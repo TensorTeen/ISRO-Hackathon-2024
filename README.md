@@ -1,1 +1,1 @@
-# ISRO-Hackathon-2024
+# ISRO-Hackthon-2024
