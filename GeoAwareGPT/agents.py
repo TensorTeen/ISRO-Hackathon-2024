@@ -1,5 +1,5 @@
 from litellm import acompletion
-import asyncio, os, sys
+import os, sys
 
 from .schema import GeminiModelConfig, ChatBuilder
 from dotenv import load_dotenv
