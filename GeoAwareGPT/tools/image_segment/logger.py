@@ -6,7 +6,7 @@ import pickle
 
 DEBUG = False # Whether to log or not
 LOG_DIR =  Path.joinpath(Path(Path(__file__).parent), 'log/')
-
+nl = '\n' # For <3.12 f-strings
 class Logger:
     def __init__(self, file: str = 'logs.log') -> None:
         if not DEBUG: return
@@ -24,9 +24,9 @@ class Logger:
         if not DEBUG: return
         with open(self.file, 'a') as fh:
             if new_section:
-                print(f'\n{'-'*50}\n\n')
+                print(f"{nl}{'-'*50}{nl}{nl}")
             if self.start:
-                print(f'\n{'='*50}\n{'='*50}\n\n')
+                print(f"{nl}{'='*50}{nl}{'='*50}{nl}{nl}")
                 self.start = False
             print(*args, **kwargs)
             print('\n')
