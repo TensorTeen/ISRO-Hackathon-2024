@@ -124,11 +124,12 @@ async def main() -> None:
     import asyncio
     import time
     model = SegmentationTool(True)
-    task_1 = asyncio.create_task((model.run('buildings', r'D:\Hackathons\ISRO 2024 Geospatial Data Retrieval\Data\Testing\city_close_ish.png')))
+    path = input('Enter path to image: ')
+    task_1 = asyncio.create_task((model.run('buildings', path)))
     print('Started running image segmentation tool 1')
-    task_2 = asyncio.create_task((model.run('buildings', r'D:\Hackathons\ISRO 2024 Geospatial Data Retrieval\Data\Testing\city_close_ish.png')))
+    task_2 = asyncio.create_task((model.run('buildings', path)))
     print('Started running image segmentation tool 2')
-    remaining = [asyncio.create_task((model.run('buildings', r'D:\Hackathons\ISRO 2024 Geospatial Data Retrieval\Data\Testing\city_close_ish.png'))) for i in range(50)]
+    remaining = [asyncio.create_task((model.run('buildings', path))) for i in range(50)]
     time.sleep(3)
     t0 = time.time()
     await asyncio.gather(task_1, task_2, *remaining)
