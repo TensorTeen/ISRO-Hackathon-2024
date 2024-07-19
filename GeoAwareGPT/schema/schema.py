@@ -52,7 +52,7 @@ class ModelConfig:
     def __str__(self):
         """Returns a string representation of the model configuration."""
         return (
-            f"{self.name} - {self.description} - {self.version} - {self.args}"  # noqa
+            f"{self.name} - {self.description} - {self.version} - {self.args}"  # noqa # type: ignore
         )
 
 

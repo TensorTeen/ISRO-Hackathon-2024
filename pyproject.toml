@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "isro-hackathon-2024"
+name = "geoawaregpt"
 version = "0.1.0"
 description = "package created for isro hackathon"
 authors = ["TensorTeen <varsity368@gmail.com>"]
@@ -11,9 +11,9 @@ python = "^3.11"
 requests = "^2.32.3"
 litellm = "^1.41.24"
 pytest = "^8.2.2"
-dotenv = "^0.0.5"
+python-dotenv = "^1.0.1"
 asyncio = "^3.4.3"
-
+segment-geospatial = "^0.10.6"
 
 [build-system]
 requires = ["poetry-core"]
