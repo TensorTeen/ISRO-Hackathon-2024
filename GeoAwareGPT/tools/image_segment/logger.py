@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Callable, Optional, Any
 import pickle
 
-DEBUG = True # Whether to log or not
+DEBUG = False # Whether to log or not
 LOG_DIR =  Path.joinpath(Path(Path(__file__).parent), 'log/')
 
 class Logger:
