@@ -1,12 +1,19 @@
-from typing import Optional, Sequence
+"""Segmentation tool. 
+
+Running this module on its own only runs in test mode (testing schema only)
+
+Classes:
+    SegmentationTool: Derives from BaseTool for calling
+"""
+
+from typing import Optional
 from io import BytesIO
 from PIL import Image
 
-import leafmap
 from samgeo.text_sam import LangSAM
 
 from .logger import Logger, Recovery
-from ...schema.base import BaseTool
+from ...schema.schema import BaseTool
 log = Logger().log
 
 bbox_threshold = 0.24
@@ -45,6 +52,7 @@ def segment_image_with_prompt(image: str|Image.Image, prompt: str,
         title (str): matplotlib plot title  
         recovery_if_error (bool): Careful - can cause large delay/file size if \
             prediction fails. Makes a pickle of the output of `sam.predict()`  
+        test (bool): Decides if only testing model schema (input/output)
 
     Returns:
         Whatever sam.predict returns: masks, boxes, phrase, logits
@@ -77,10 +85,23 @@ def segment_image_with_prompt(image: str|Image.Image, prompt: str,
 
 
 class SegmentationTool(BaseTool):
+    """
+    Tool for image segmentation using segment-geospatial library
+
+    Attributes:
+        test (bool): Decides if this module is being run in test mode
+    
+    """
     def __init__(self, test_schema=False):
+        """
+        Constructor for SegmentationTool
+
+        Args:
+            test_schema (bool): In case you just want to check schema
+        """
         name = 'SegmentationTool'
         description = f'Placeholder:\n{segment_image_with_prompt.__doc__}'
-        version = '0.0'
+        version = '0.1'
         super().__init__(name, description, version)
         self.test = test_schema
         if self.test:
@@ -90,13 +111,16 @@ class SegmentationTool(BaseTool):
                            category=UserWarning)
 
     async def run(self, input_prompt: str, input_image: Image.Image|str) -> Image.Image:
+        """
+        
+        """
         # str is for testing
         result = await asyncio.to_thread(segment_image_with_prompt, input_image, input_prompt, recovery_if_error=False, test=self.test)
         # works
         return result
     
 async def main() -> None:
-    # Just testing the asynchronous nature of things
+    """Runs module in test mode"""
     import asyncio
     import time
     model = SegmentationTool(True)
