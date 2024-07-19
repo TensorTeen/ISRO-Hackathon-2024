@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "isro-hackathon-2024"
+version = "0.1.0"
+description = "package created for isro hackathon"
+authors = ["TensorTeen <varsity368@gmail.com>"]
+license = "GPL"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.32.3"
+litellm = "^1.41.24"
+pytest = "^8.2.2"
+dotenv = "^0.0.5"
+asyncio = "^3.4.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
