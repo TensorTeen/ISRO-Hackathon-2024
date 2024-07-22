@@ -14,6 +14,7 @@ pytest = "^8.2.2"
 python-dotenv = "^1.0.1"
 asyncio = "^3.4.3"
 segment-geospatial = "^0.10.6"
+sqlalchemy = "^2.0.31"
 
 [build-system]
 requires = ["poetry-core"]
