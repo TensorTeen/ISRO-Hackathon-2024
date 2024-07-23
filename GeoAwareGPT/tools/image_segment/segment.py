@@ -9,10 +9,11 @@ Classes:
 from typing import Optional
 from io import BytesIO
 from PIL import Image
+import asyncio
 
 from samgeo.text_sam import LangSAM
 
-from .logger import Logger, Recovery
+from .logger import Logger, Recovery # Disabled by default
 from ...schema.schema import BaseTool
 log = Logger().log
 
@@ -20,10 +21,10 @@ bbox_threshold = 0.24
 text_threshold = 0.24
 
 def open_image(image: str|Image.Image) -> Image.Image:
-    if not isinstance(image, str) or isinstance(image, Image.Image):
-        raise TypeError(f'Image should be a string or PIL image, not \
-                        {type(image)}.\n{type(image).mro() = }')
-    img = Image.open(image).convert('RGB') if isinstance(image, str) else image
+    if not (isinstance(image, str) or isinstance(image, Image.Image)):
+        raise TypeError(f"""Image should be a string or PIL image, not {type(image)}.
+{type(image).mro() = }""")
+    img = Image.open(image).convert('RGB') if isinstance(image, str) else image.convert('RGB')
     try:
         img.load()
     except OSError as e:
@@ -75,10 +76,11 @@ def segment_image_with_prompt(image: str|Image.Image, prompt: str,
             cmap="Greens",
             add_boxes=show_boxes,
             box_color="red", # seems to be ignored if not showing boxes
-            title=title.format(prompt),
+            title=None, # We don't actually want this
             blend=True, # False simply hides the original image - makes no sense
             output=output
         )
+        # Raises an exception, which is ignored
         output_image = Image.open(output)
         output_image.load()
     return output_image
@@ -100,7 +102,7 @@ class SegmentationTool(BaseTool):
             test_schema (bool): In case you just want to check schema
         """
         name = 'SegmentationTool'
-        description = f'Placeholder:\n{segment_image_with_prompt.__doc__}'
+        description = f'Placeholder:{segment_image_with_prompt.__doc__}'
         version = '0.1'
         super().__init__(name, description, version)
         self.test = test_schema
@@ -112,7 +114,18 @@ class SegmentationTool(BaseTool):
 
     async def run(self, input_prompt: str, input_image: Image.Image|str) -> Image.Image:
         """
+        Segment an image based on a text prompt. 
+
+        Args:
+            input_prompt (str): The input text. 
+                Should preferably be a single word, as the model struggles with logic
+            input_image (PIL.Image.Image|str): An input image or a file path (to an image)
+
+        Returns:
+            PIL.Image.Image: The segmented image
         
+        Raises:
+            Runtime Error: If the input image can't be loaded by PIL
         """
         # str is for testing
         result = await asyncio.to_thread(segment_image_with_prompt, input_image, input_prompt, recovery_if_error=False, test=self.test)
@@ -120,7 +133,7 @@ class SegmentationTool(BaseTool):
         return result
     
 async def main() -> None:
-    """Runs module in test mode"""
+    """Runs module in test mode. Run the proper test in tests to see how to call the model properly"""
     import asyncio
     import time
     model = SegmentationTool(True)
@@ -136,7 +149,7 @@ async def main() -> None:
     print(f'Time Taken to run 52 3-second sleeps = {time.time() - t0}')
     # Time Taken to run 52 3-second sleeps = 16 (~ 16 +- 0.2)
 if __name__ == '__main__':
-    # python -m ISRO-Hackathon-2024.tools.image_segment.segment
+    # python -m GeoAwareGPT.tools.image_segment.segment
     import asyncio
     import time
     asyncio.run(main())
