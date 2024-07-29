@@ -1,5 +1,6 @@
 from .schema import ModelConfig, GeminiModelConfig, BaseTool, QueryInput, ChatBuilder
 from .agents import GeminiModel, Agent
+from .ToolHandler import ToolHandler
 
 __all__ = [
     "ModelConfig",
@@ -9,4 +10,5 @@ __all__ = [
     "GeminiModel",
     "Agent",
     "ChatBuilder",
+    "ToolHandler",
 ]

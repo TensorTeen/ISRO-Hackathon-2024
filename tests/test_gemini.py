@@ -25,4 +25,5 @@ def test_gemini_llm(agent_instance, model_config):
     gemini_llm.add_user_message("How are you?")
     response = asyncio.run(gemini_llm.get_assistant_response())
     print("response2", response)
+    print(gemini_llm)
     assert response.strip() == "How are you?"
