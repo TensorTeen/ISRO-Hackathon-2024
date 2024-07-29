@@ -10,7 +10,9 @@ load_dotenv()
 class Model:
     def __init__(self) -> None:
         pass
-
+    async def generate(self, messages: ChatBuilder):
+        "This method should be implemented by all child classes for prompt generation"
+        raise NotImplementedError("This method is meant to be implemented by child classes")
 
 class GeminiModel(Model):
     def __init__(self, model_config: GeminiModelConfig = GeminiModelConfig()):
@@ -40,7 +42,7 @@ class GeminiModel(Model):
 
 class Agent:
     def __init__(self, model: Model | None = None):
-        self.model = model
+        self.model = model or GeminiModel()
         self.messages = ChatBuilder()
 
     def set_system_prompt(self, prompt: str):
