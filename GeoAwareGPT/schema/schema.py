@@ -16,11 +16,11 @@ class BaseTool:
         __str__(): Returns a string representation of the tool.
     """
 
-    def __init__(self, name: str, description: str, version: str):
+    def __init__(self, name: str, description: str, version: str, args: dict = {}):
         self.name = name
         self.description = description
         self.version = version
-        self.args: List = []
+        self.args: dict = args  # argument: description(type)
         self.tool_type: str = "AU"  # Assistant
 
     def run(self):
@@ -29,7 +29,7 @@ class BaseTool:
 
     def __str__(self):
         """Returns a string representation of the tool."""
-        return f"{self.name} - {self.description} - {self.version} - {self.args}"
+        return f"""{self.name}[args:{self.args}]: {self.description}"""
 
 
 class ModelConfig:
@@ -51,9 +51,7 @@ class ModelConfig:
 
     def __str__(self):
         """Returns a string representation of the model configuration."""
-        return (
-            f"{self.name} - {self.description} - {self.version} - {self.args}"  # noqa # type: ignore
-        )
+        return f"{self.name} - {self.description} - {self.version} - {self.args}"  # noqa # type: ignore
 
 
 class GeminiModelConfig(ModelConfig):
@@ -152,3 +150,39 @@ class ChatBuilder:
 
     def build(self):
         return self.chat
+
+
+class BaseState:
+    """A base class representing a state.
+
+    Attributes:
+        name (str): The name of the state.
+        goal (str): The goal of the state.
+        instructions (str): The instructions for the state.
+        tools (List): A list of tools available in the state.
+
+    Methods:
+        __str__(): Returns a string representation of the state.
+    """
+
+    def __init__(
+        self, name: str, goal: str, instructions: str, tools: list[BaseTool] = []
+    ):
+        self.name = name
+        self.goal = goal
+        self.instructions = instructions
+        self.tools: List[BaseTool] = tools
+
+    def add_tool(self, tool: BaseTool):
+        """Adds a tool to the state."""
+        self.tools.append(tool)
+
+    def __str__(self):
+        """Returns a string representation of the state."""
+        return f"""
+        <state_details>
+        Name: {self.name}
+        Goal: {self.goal}
+        Instructions: {self.instructions}
+        Tools: {[str(tool) for tool in self.tools]}
+    """

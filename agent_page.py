@@ -1,20 +1,9 @@
 import streamlit as st
 from GeoAwareGPT import Agent, GeminiModel, GeminiModelConfig, ToolHandler
+from GeoAwareGPT.schema import BaseTool, BaseState
+from GeoAwareGPT.tools.database_integration import CoordinateTool
 import asyncio, json
 from json import JSONDecodeError
-
-tool_handler = ToolHandler()
-if "initialized" not in st.session_state or not st.session_state.initialized:
-    print("Initializing agent")
-    st.session_state.agent = Agent(
-        model=GeminiModel(
-            model_config=GeminiModelConfig(model_name="gemini/gemini-1.0-pro")
-        )
-    )
-    st.session_state.initialized = True
-
-
-agent = st.session_state.agent
 
 SYSTEM_PROMPT = """You are a helpful conversational assistant. Below are the details about the usecase which you need to abide by stricly:
 <usecase_details>
@@ -23,15 +12,6 @@ you are a conversational agent that helps users with their queries related to ge
 
 You are currently in a specific state of the conversational-flow described below 
 Details about the current-state:
-<state_details>
-Name: GlobalState
-Goal: To Answer the user's query regarding geography using the tools available to the assistant
-Instructions: 1. Given the location name and what to landmark to search nearby use the TOOL:get_coordinates to fetch the latitude and longitude of the location. 2. Using the lattitude and longtitude information call the TOOL:get_nearby_landmarks to fetch the nearby landmarks. 3. Output this landmark information to the user. You can follow this step by step process to answer the user's query. CALL ONE TOOL AT A TIME and respond to the user with the information fetched from the tool. YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION.
-Tools: 
-- get_nearby_landmarks: This tool fetches the nearby landmarks of a location.
-    {args: landmark: str}
-</state_details>
-
 Instructions to be followed:
 - The thought should be very descriptive and should include the reason for selecting the tool and the parameters to be passed to the tool.
 - Make the conversation coherent. The responses generated should feel like a normal conversation. 
@@ -57,21 +37,41 @@ Respond to the user in the conversation strictly following the below JSON format
 }
 """
 
-st.title("GeoAwareGPT")
-input = st.text_input("Enter your Query")
-st.write("You entered: ", input)
-if input:
-    agent.set_system_prompt(SYSTEM_PROMPT)
+tool_handler = ToolHandler()
+if "initialized" not in st.session_state or not st.session_state.initialized:
+    print("Initializing agent")
+    st.session_state.agent = Agent(
+        model=GeminiModel(
+            model_config=GeminiModelConfig(model_name="gemini/gemini-1.5-flash")
+        )
+    )
+    st.session_state.initialized = True
+    state = BaseState(
+        name="GlobalState",
+        goal="To Answer the user's query regarding geography using the tools available to the assistant",
+        instructions="1. Given the location name and what to landmark to search nearby use the TOOL:get_coordinates to fetch the latitude and longitude of the location. 2. Output this information to the user. You can follow this step by step process to answer the user's query. CALL ONE TOOL AT A TIME and respond to the user with the information fetched from the tool. YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION.",
+        tools=[CoordinateTool()],
+    )
+    st.session_state.agent.states.append(state)
+    st.session_state.agent.set_system_prompt(SYSTEM_PROMPT)
 
-    agent.add_user_message(input)
+
+agent = st.session_state.agent
+
+
+st.title("GeoAwareGPT")
+st.write(
+    "Welcome to GeoAwareGPT, your friendly conversational assistant for geography-related queries."
+)
+st.write("Please enter your query below:")
+user_input = st.text_input("User Query", "")
+
+if st.button("Submit"):
+    agent.add_user_message(user_input)
     response = asyncio.run(agent.get_assistant_response())
-    agent.add_assistant_message(response)
     try:
         response = json.loads(response)
+        agent.add_assistant_message(response["audio"])
     except JSONDecodeError:
-        print(response)
-        response = {"error": "Invalid JSON input"}
-        
-    print(agent.messages.chat)
-    tool_handler.handle_tool(response)
-    st.write("Response: ", response["audio"])
+        st.write(response)
+    st.write(agent.messages)

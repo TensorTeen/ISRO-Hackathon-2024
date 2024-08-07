@@ -1,6 +1,4 @@
 from .tools.database_integration import CoordinateTool
-from .tools.database_integration import NearbyLandmarksTool
-from .tools.image_segment import ImageSegmentTool
 
 
 class ToolHandler:

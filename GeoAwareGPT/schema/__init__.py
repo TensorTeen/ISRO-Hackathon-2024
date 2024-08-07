@@ -1,4 +1,11 @@
-from .schema import ModelConfig, GeminiModelConfig, BaseTool, QueryInput, ChatBuilder
+from .schema import (
+    ModelConfig,
+    GeminiModelConfig,
+    BaseTool,
+    QueryInput,
+    ChatBuilder,
+    BaseState,
+)
 
 __all__ = [
     "ModelConfig",
@@ -6,4 +13,5 @@ __all__ = [
     "BaseTool",
     "QueryInput",
     "ChatBuilder",
+    "BaseState",
 ]
