@@ -32,6 +32,22 @@ class BaseTool:
         return f"""{self.name}[args:{self.args}]: {self.description}"""
 
 
+class AzureTool(BaseTool):
+    def __init__(self, name: str, description: str, version: str, args: dict = {}):
+        super().__init__(name, description, version, args)
+        # self.tool_type = "AZ"
+        from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential
+
+        try:
+            self.credential = DefaultAzureCredential()
+            # do az login
+            # Check if given credential can get token successfully.
+            self.credential.get_token("https://management.azure.com/.default")
+        except Exception as ex:
+            # Fall back to InteractiveBrowserCredential in case DefaultAzureCredential not work
+            # This will open a browser page for
+            self.credential = InteractiveBrowserCredential()
+
 class ModelConfig:
     """A class representing the configuration of a model.
 
