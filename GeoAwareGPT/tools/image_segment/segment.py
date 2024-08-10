@@ -12,9 +12,10 @@ from PIL import Image
 import asyncio
 
 from samgeo.text_sam import LangSAM
+from azure.ai.ml import MLClient
 
 from .logger import Logger, Recovery # Disabled by default
-from ...schema.schema import BaseTool
+from ...schema import BaseTool, AzureTool, AzureEndpointContextManager
 log = Logger().log
 
 bbox_threshold = 0.24
@@ -106,6 +107,7 @@ class SegmentationTool(BaseTool):
         version = '0.1'
         super().__init__(name, description, version)
         self.test = test_schema
+        self.tool_type = 'AU'
         if self.test:
             import warnings
             warnings.warn('Running in testing mode - simply an identity \
@@ -132,6 +134,42 @@ class SegmentationTool(BaseTool):
         # works
         return result
     
+class AzureSegmentationTool(AzureTool):
+    def __init__(self, name: str, description: str, version: str, args: dict = {}, config=None):
+        super().__init__(name, description, version, args, config)
+        self.tool_type = 'AU'
+        
+        subscription_id = self.workspace_client.subscription_id
+        resource_group = self.workspace_client.resource_group_name
+        workspace_name = self.workspace_client.workspace_name
+
+        self.registry: MLClient =  MLClient(
+            self.credential,
+            subscription_id,
+            resource_group,
+            registry_name="azureml",
+        )
+        # //  self.initialized: bool = False # Starts online endpoint only after 1st call
+        # !^ Would overuse compute
+    
+    async def run(self, input_prompt: str, input_image: Image.Image|str) -> Image.Image:
+        from azure.ai.ml.entities import ManagedOnlineEndpoint, ManagedOnlineDeployment
+        model = 'facebook-sam-vit-base'
+        timestamp = int(time.time())
+        foundation_model = self.registry.models.get(name=model, label="latest")
+        online_endpoint_name = "mask-gen-" + str(timestamp)
+        # Create an online endpoint
+
+        endpoint = ManagedOnlineEndpoint(
+            name=online_endpoint_name,
+            description="Online endpoint for "
+            + foundation_model.name
+            + ", for mask-generation task",
+            # auth_mode="key",
+        )
+        with AzureEndpointContextManager(self.workspace_client, endpoint):
+                
+
 async def main() -> None:
     """Runs module in test mode. Run the proper test in tests to see how to call the model properly"""
     import asyncio

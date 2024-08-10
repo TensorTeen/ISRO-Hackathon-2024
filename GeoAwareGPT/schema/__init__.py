@@ -6,7 +6,7 @@ from .schema import (
     ChatBuilder,
     BaseState,
 )
-
+from .azure_schema import AzureTool, AzureEndpointContextManager
 __all__ = [
     "ModelConfig",
     "GeminiModelConfig",
@@ -14,4 +14,6 @@ __all__ = [
     "QueryInput",
     "ChatBuilder",
     "BaseState",
+    "AzureTool",
+    "AzureMLClient",
 ]
