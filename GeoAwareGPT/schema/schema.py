@@ -48,6 +48,7 @@ class AzureTool(BaseTool):
             # This will open a browser page for
             self.credential = InteractiveBrowserCredential()
 
+
 class ModelConfig:
     """A class representing the configuration of a model.
 
@@ -202,3 +203,18 @@ class BaseState:
         Instructions: {self.instructions}
         Tools: {[str(tool) for tool in self.tools]}
     """
+
+
+class ToolImageOutput:
+    """A class representing the output of a tool with an image.
+
+    Attributes:
+        image_url (str): The URL of the image output.
+        args (dict): The arguments for the tool.
+
+    Methods:
+        __str__(): Returns a string representation of the tool image output.
+    """
+
+    def __init__(self):
+        self.image = None

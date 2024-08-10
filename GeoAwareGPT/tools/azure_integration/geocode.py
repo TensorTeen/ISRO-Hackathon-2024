@@ -9,7 +9,7 @@ load_dotenv()
 
 class GeoCode(BaseTool):
     def __init__(self):
-        self.name = "GeoCode"
+        self.name = "geocode"
         self.description = "A tool to geocode an address"
         self.version = "1.0"
         self.args: dict = {

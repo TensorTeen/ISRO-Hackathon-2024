@@ -1,8 +1,11 @@
 from litellm import acompletion
 import os, sys
-
+import json
+from json import JSONDecodeError
 from .schema import GeminiModelConfig, ChatBuilder, BaseTool, BaseState
 from dotenv import load_dotenv
+from .ToolHandler import ToolHandler
+from GeoAwareGPT.schema.schema import ToolImageOutput
 
 load_dotenv()
 
@@ -45,10 +48,15 @@ class GeminiModel(Model):
 
 
 class Agent:
-    def __init__(self, model: Model | None = None):
+    def __init__(
+        self,
+        states: BaseState,
+        model: Model | None = None,
+    ) -> None:
         self.model = model or GeminiModel()
         self.messages = ChatBuilder()
-        self.states: list[BaseState] = []
+        self.states: list[BaseState] = states
+        self.tool_handler = ToolHandler(tools=self.states[0].tools)
 
     def set_system_prompt(self, prompt: str):
         self.messages.system_message(prompt + "\n" + str(self.states[0]))
@@ -60,6 +68,7 @@ class Agent:
         self.messages.assistant_message(message)
 
     async def get_assistant_response(self):
+        print(self.messages.chat)
         response = await self.model.generate(self.messages)
         if response and response.choices:
             answer = response.choices[0].message.content
@@ -70,3 +79,27 @@ class Agent:
 
     def add_tool(self, tool: BaseTool):
         self.tools.append(tool)
+
+    async def agent_loop(self):
+        print(self.messages.chat)
+        response = await self.get_assistant_response()
+        try:
+            response = json.loads(response)
+        except:
+            print(response)
+        tool_calls = response["tool_calls"]
+        if not tool_calls:
+            return {}, {}, False, response["audio"]
+        tool_results = await self.tool_handler.handle_tool(tool_calls)
+        AUA = tool_results.get("AUA", False)
+        tool_results_display = {}
+        tool_results_text = {}
+        for i in tool_results:
+            if isinstance(tool_results[i], ToolImageOutput):
+                tool_results_display[i] = tool_results[i]
+                tool_results_text[i] = "Image shown to user"
+            else:
+                tool_results_text[i] = str(tool_results[i])
+            print(f"{i}: {tool_results_text[i]}")
+        self.add_user_message(str({"tool_results": json.dumps(tool_results_text)}))
+        return tool_results_display, tool_results_text, AUA, response["audio"]

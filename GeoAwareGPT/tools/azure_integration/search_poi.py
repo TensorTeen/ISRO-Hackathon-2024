@@ -10,7 +10,7 @@ load_dotenv()
 
 class SearchPOI(BaseTool):
     def __init__(self):
-        self.name = "SearchPOI"
+        self.name = "search_poi"
         self.description = (
             "A tool to find the nearby landmarks given gecoded location and a query"
         )
