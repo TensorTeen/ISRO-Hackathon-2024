@@ -1,9 +1,12 @@
 import streamlit as st
 from GeoAwareGPT import Agent, GeminiModel, GeminiModelConfig, ToolHandler
 from GeoAwareGPT.schema import BaseTool, BaseState
-from GeoAwareGPT.tools.database_integration import CoordinateTool
+from GeoAwareGPT.tools.azure_integration import GeoCode, SearchPOI, GeoDecode
 import asyncio, json
 from json import JSONDecodeError
+import litellm
+
+litellm.set_verbose = True
 
 SYSTEM_PROMPT = """You are a helpful conversational assistant. Below are the details about the usecase which you need to abide by stricly:
 <usecase_details>
@@ -36,25 +39,27 @@ Respond to the user in the conversation strictly following the below JSON format
     "audio": "...",  # Audio response in simple, short, sentence segmented format
 }
 """
-
-tool_handler = ToolHandler()
+tools = [GeoCode(), SearchPOI(), GeoDecode()]
+states = [
+    BaseState(
+        name="GlobalState",
+        goal="To Answer the user's query regarding geography using the tools available to the assistant",
+        instructions="1.CALL ONE TOOL AT A TIME and respond to the user with the information fetched from the tool. YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION. If you have answered the user's query then do not call any tools",
+        tools=tools,
+    )
+]
+tool_handler = ToolHandler(tools=tools)
 if "initialized" not in st.session_state or not st.session_state.initialized:
     print("Initializing agent")
     st.session_state.agent = Agent(
         model=GeminiModel(
             model_config=GeminiModelConfig(model_name="gemini/gemini-1.5-flash")
-        )
+        ),
+        states=states,
     )
     st.session_state.initialized = True
-    state = BaseState(
-        name="GlobalState",
-        goal="To Answer the user's query regarding geography using the tools available to the assistant",
-        instructions="1. Given the location name and what to landmark to search nearby use the TOOL:get_coordinates to fetch the latitude and longitude of the location. 2. Output this information to the user. You can follow this step by step process to answer the user's query. CALL ONE TOOL AT A TIME and respond to the user with the information fetched from the tool. YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION.",
-        tools=[CoordinateTool()],
-    )
-    st.session_state.agent.states.append(state)
     st.session_state.agent.set_system_prompt(SYSTEM_PROMPT)
-
+    st.session_state.AUA = True
 
 agent = st.session_state.agent
 
@@ -67,11 +72,20 @@ st.write("Please enter your query below:")
 user_input = st.text_input("User Query", "")
 
 if st.button("Submit"):
+    c = 0
     agent.add_user_message(user_input)
-    response = asyncio.run(agent.get_assistant_response())
-    try:
-        response = json.loads(response)
-        agent.add_assistant_message(response["audio"])
-    except JSONDecodeError:
-        st.write(response)
-    st.write(agent.messages)
+    while True:
+        print("Iteration:", c)
+        if c > 10:
+            st.write("Too many iterations, breaking")
+            break
+        if st.session_state.AUA:
+            image, text, AUA, audio = asyncio.run(agent.agent_loop())
+            st.write("Audio", audio)
+            st.write("Tool Result:", text)
+            st.session_state.AUA = AUA
+            c += 1
+            continue
+        else:
+            break
+    st.session_state.AUA = True
