@@ -78,18 +78,5 @@ class AzureTool(BaseTool):
 
 
 class AzureModel:
-        model = 'facebook-sam-vit-base'
-        timestamp = int(time.time())
-        foundation_model = self.registry.models.get(name=model, label="latest")
-        online_endpoint_name = "mask-gen-" + str(timestamp)
-        # Create an online endpoint
-
-        endpoint = ManagedOnlineEndpoint(
-            name=online_endpoint_name,
-            description="Online endpoint for "
-            + foundation_model.name
-            + ", for mask-generation task",
-            # auth_mode="key",
-        )
-        with AzureEndpointContextManager(self.workspace_client, endpoint):
+        ...
             
