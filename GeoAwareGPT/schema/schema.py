@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import os
 
 class BaseTool:
@@ -16,12 +16,13 @@ class BaseTool:
         __str__(): Returns a string representation of the tool.
     """
 
-    def __init__(self, name: str, description: str, version: str, args: dict = {}):
+    def __init__(self, name: str, description: str, version: str, args: Optional[dict] = None):
         self.name = name
         self.description = description
         self.version = version
-        self.args: dict = args  # argument: description(type)
+        self.args: dict = args or {} # argument: description(type)
         self.tool_type: str = "AU"  # Assistant
+        self.tool_output = 'default'
 
     def run(self):
         """Abstract method to run the tool."""

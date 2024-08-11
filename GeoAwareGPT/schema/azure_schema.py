@@ -1,8 +1,10 @@
-from typing import Self
+from typing import Self, Optional
+import os
 
 from azure.ai.ml.entities import ManagedOnlineEndpoint, ManagedOnlineDeployment
 from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential
 from azure.core.exceptions import ClientAuthenticationError
+from azure.core.credentials import AzureKeyCredential
 from azure.ai.ml import MLClient
 from azure.ai.ml.exceptions import ValidationException
 
@@ -45,7 +47,7 @@ class AzureEndpointContextManager:
         
 
 class AzureTool(BaseTool):
-    def __init__(self, name: str, description: str, version: str, args: dict = {}, config=None):
+    def __init__(self, name: str, description: str, version: str, args: Optional[dict] = None, config=None):
         """
         Initializes an instance of the schema class.
         Args:
@@ -58,7 +60,7 @@ class AzureTool(BaseTool):
                 If not specified, uses config.json.
         """
         super().__init__(name, description, version, args)
-        # self.tool_type = "AZ" - should be set by child classes
+        # self.tool_type = "" - should be set by child classes
         
 
 
@@ -72,9 +74,11 @@ class AzureTool(BaseTool):
             # This will open a browser page for
             self.credential = InteractiveBrowserCredential()
 
-        self.workspace_client: MLClient = MLClient.from_config(self.credential, file_name=config)
+        # self.workspace_client: MLClient = MLClient.from_config(self.credential, file_name=config)
         
         
+
+
 
 
 class AzureModel:

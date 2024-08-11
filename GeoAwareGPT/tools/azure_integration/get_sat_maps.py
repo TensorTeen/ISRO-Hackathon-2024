@@ -1,5 +1,6 @@
 from azure.core.credentials import AzureKeyCredential
 from azure.maps.render import MapsRenderClient
+from azure.identity import DefaultAzureCredential
 import os
 from dotenv import load_dotenv
 from PIL import Image
@@ -7,14 +8,24 @@ import io
 import math
 
 load_dotenv()
+# print(os.environ.get("AZURE_SUBSCRIPTION_KEY"))
+# credential = AzureKeyCredential(os.environ.get("AZURE_SUBSCRIPTION_KEY"))
 
-credential = AzureKeyCredential(os.environ.get("AZURE_SUBSCRIPTION_KEY"))
+# render_client = MapsRenderClient(
+#     credential=credential,
+# )
+
+load_dotenv()
+client_id = os.environ['AZURE_CLIENT_ID']
+subscription_key = os.environ['AZURE_SUBSCRIPTION_KEY']
+print(f'{client_id=}\n{subscription_key=}')
+credential = DefaultAzureCredential()
+# credential = AzureKeyCredential(subscription_key)
 
 render_client = MapsRenderClient(
     credential=credential,
+    client_id=client_id,
 )
-
-
 def lat_long_to_tile_xy(latitude, longitude, zoom):
     # Ensure latitude and longitude are within bounds
     if latitude < -85.05112878:

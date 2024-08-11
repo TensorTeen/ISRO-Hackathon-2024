@@ -15,5 +15,5 @@ __all__ = [
     "ChatBuilder",
     "BaseState",
     "AzureTool",
-    "AzureMLClient",
+    "AzureEndpointContextManager",
 ]

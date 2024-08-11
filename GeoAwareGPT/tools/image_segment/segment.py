@@ -135,7 +135,10 @@ class SegmentationTool(BaseTool):
         return result
     
 class AzureSegmentationTool(AzureTool):
-    def __init__(self, name: str, description: str, version: str, args: dict = {}, config=None):
+    def __init__(self, config=None):
+        name = 'SegmentationTool'
+        description = f'Placeholder:{segment_image_with_prompt.__doc__}'
+        version = '0.1'
         super().__init__(name, description, version, args, config)
         self.tool_type = 'AU'
         
