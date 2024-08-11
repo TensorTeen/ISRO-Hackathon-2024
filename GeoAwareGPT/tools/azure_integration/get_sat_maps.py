@@ -24,7 +24,7 @@ credential = DefaultAzureCredential()
 
 render_client = MapsRenderClient(
     credential=credential,
-    client_id=client_id,
+    # client_id=client_id,
 )
 def lat_long_to_tile_xy(latitude, longitude, zoom):
     # Ensure latitude and longitude are within bounds

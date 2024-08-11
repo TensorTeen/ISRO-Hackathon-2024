@@ -1,8 +1,12 @@
 import os
 import math
 import requests
-from typing import Tuple
+from typing import Tuple, Callable
+from functools import wraps
 from PIL import Image
+from collections.abc import Iterator
+import io
+import asyncio
 
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential
@@ -26,6 +30,19 @@ from ...schema import AzureTool
 #         return DefaultAzureCredential()
 #     else:
 #         raise ValueError("Invalid mode. Must be 'SKA' or 'Entra'.")
+def make_async(func: Callable) -> Callable:
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        result = await asyncio.to_thread(func, *args, **kwargs)
+        return result
+    return wrapper
+def fake_make_async(func: Callable) -> Callable:
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        return result
+    return wrapper
+
 def lat_long_to_tile_xy(latitude, longitude, zoom):
     # Ensure latitude and longitude are within bounds
     if latitude < -85.05112878:
@@ -64,27 +81,39 @@ class SatelliteImage(AzureTool):
         )
         self.tool_type = "AU"
         self.tool_output = "image"
-        self.ska = os.environ['AZURE_SUBSCRIPTION_KEY']
-        print(f'{self.ska=}')
-    def run(self, bbox: Tuple[float, float, float, float]) -> Image.Image:
-        tilesetId = "microsoft.imagery"
-        bounding_box = ','.join(map(str, bbox))
-        uri = f'https://atlas.microsoft.com/map/static?api-version=2024-04-01&tilesetId={tilesetId}&bbox={bounding_box}&view=IN&subscription-key={self.ska}'
-        print(uri)
-        raise Exception("Not implemented")
-        result: requests.Response = requests.get()
-        try:
-            img = Image.open(result.content)
-        except Exception as e:
-            print(result)
-            raise e
-        return img
-    
-def main():
+        self.render_client = MapsRenderClient(
+            credential=self.credential,
+            client_id=os.environ['AZURE_CLIENT_ID'],
+        )
+        # self.ska = os.environ['AZURE_SUBSCRIPTION_KEY']
+        # print(f'{self.ska=}')
+    async def run(self, latitude: float, longitude: float, zoom: int) -> Image.Image:
+        x, y = lat_long_to_tile_xy(latitude, longitude, zoom)
+        get_tile = make_async(MapsRenderClient.get_map_tile)
+        result: Iterator[bytes] = await get_tile(
+            self.render_client,
+            tileset_id="microsoft.imagery",
+            x=x,
+            y=y,
+            z=zoom,
+        )
+        @make_async
+        def load_image(result: Iterator[bytes]) -> Image.Image:
+            img_file = io.BytesIO()
+            for chunk in result:
+                img_file.write(chunk)
+            img: Image.Image = Image.open(img_file)
+            try:
+                img.load()
+            except OSError as e:
+                raise ValueError(f"Could not load image") from e
+            return img
+        return await load_image(result)
+async def main():
     # python -m GeoAwareGPT.tools.azure_integration.satellite_image
     tool = SatelliteImage()
-    img = tool.run((13.08784, 80.27847, 13.08785, 80.27848))
+    img = await tool.run(13.08784, 80.27847, 4)
     img.save("test_satellite_img.png")
     img.show()
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
