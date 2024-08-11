@@ -9,17 +9,22 @@ load_dotenv()
 
 class GeoCode(BaseTool):
     def __init__(self):
-        super().__init__()
-        self.name = "geocode"
-        self.description = "A tool to geocode an address"
-        self.version = "1.0"
-        self.args: dict = {
-            "address": "Address/name of the location to geocode(str)"
-        }  # argument: description(type)
+        super().__init__(
+            name="geocode",
+            description="A tool to geocode an address",
+            version="1.0",
+            args={"address": "Address/name of the location to geocode(str)"},
+        )
+        # self.name = "geocode"
+        # self.description = "A tool to geocode an address"
+        # self.version = "1.0"
+        # self.args: dict = {
+        #     "address": "Address/name of the location to geocode(str)"
+        # }  # argument: description(type)
         self.tool_type: str = "AUA"
 
     def run(self, address):
-        credential = AzureKeyCredential(os.getenv("AZURE_SUBSCRIPTION_KEY"))
+        credential = AzureKeyCredential(os.environ["AZURE_SUBSCRIPTION_KEY"])
         # Create a search client
         search_client = azsearch.MapsSearchClient(credential)
 

@@ -1,14 +1,14 @@
 import streamlit as st
 from GeoAwareGPT import Agent, GeminiModel, GeminiModelConfig, ToolHandler
 from GeoAwareGPT.schema import BaseTool, BaseState
-from GeoAwareGPT.tools.azure_integration import GeoCode, SearchPOI, GeoDecode
+from GeoAwareGPT.tools.azure_integration import GeoCode, SearchPOI, GeoDecode, SatelliteImage
 import asyncio, json
 from json import JSONDecodeError
 import litellm
 
 litellm.set_verbose = True
 
-SYSTEM_PROMPT = """You are a helpful conversational assistant. Below are the details about the usecase which you need to abide by stricly:
+SYSTEM_PROMPT = """You are a helpful conversational assistant. Below are the details about the use case which you need to abide by strictly:
 <usecase_details>
 you are a conversational agent that helps users with their queries related to geography. You have access to a variety of tools that can help you fetch information about a location, and more.
 </usecase_details>
@@ -21,8 +21,10 @@ Instructions to be followed:
 - Only use the tools available in the should be there in the assistant outputs
 - Do not generate unicode characters or hindi characters at all.
 - The audio should be engaging, short and crisp. It should be more human conversation like.
+- If a tool needs input from a previous tool, call the previous tool first and use "$PREV[i]$" (without quotes) as a placeholder for the output, where i is the index of the the previous tool
+- If a tool requires an input image, use "$IMAGE$" (without quotes) as a placeholder for the image uploaded by the user
 
-Bot specific instructions to be followed: (Note: These instructions are specific to the bot type and should be followed strictly ovveriding the general instructions)
+Bot specific instructions to be followed: (Note: These instructions are specific to the bot type and should be followed strictly overriding the general instructions)
 - Sentences in 'audio' key should be short and not verbose.
 - Use informal, more conversational and colloquial language. Avoid decorative words and choice of too much drama in your language.
 - Avoid bulleted lists, markdowns, structured outputs, and any special characters like double quotes, single quotes, or hyphen etc in your responses.
@@ -34,12 +36,12 @@ Bot specific instructions to be followed: (Note: These instructions are specific
 
 Respond to the user in the conversation strictly following the below JSON format:
 {
-    "thought": "...",  # Thought process of the bot to decide what cotent to reply with, which tool(s) to call, briefly describing reason for tool arguments as well
+    "thought": "...",  # Thought process of the bot to decide what content to reply with, which tool(s) to call, briefly describing reason for tool arguments as well
     "tool_calls": [{"name": "...", "args": {...}}, {"name": "...", "args": {...}}, ...],  # List of tools to be called along with the appropriate arguments
     "audio": "...",  # Audio response in simple, short, sentence segmented format
 }
 """
-tools = [GeoCode(), SearchPOI(), GeoDecode()]
+tools = [GeoCode(), SearchPOI(), GeoDecode(), SatelliteImage()]
 states = [
     BaseState(
         name="GlobalState",
@@ -70,6 +72,7 @@ st.write(
 )
 st.write("Please enter your query below:")
 user_input = st.text_input("User Query", "")
+image_input = st.file_uploader("Upload an Image", accept_multiple_files=False, type='png')
 
 if st.button("Submit"):
     c = 0
@@ -81,6 +84,9 @@ if st.button("Submit"):
             break
         if st.session_state.AUA:
             image, text, AUA, audio = asyncio.run(agent.agent_loop())
+            if image:
+                for img in image.values():
+                    st.image(img)
             st.write("Audio", audio)
             st.write("Tool Result:", text)
             st.session_state.AUA = AUA

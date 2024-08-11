@@ -10,9 +10,13 @@ from typing import Optional
 from io import BytesIO
 from PIL import Image
 import asyncio
+import base64
+import requests
+import json
 
 from samgeo.text_sam import LangSAM
 from azure.ai.ml import MLClient
+from azure.ai.ml.entities import OnlineRequestSettings, ProbeSettings
 
 from .logger import Logger, Recovery # Disabled by default
 from ...schema import BaseTool, AzureTool, AzureEndpointContextManager
@@ -136,15 +140,25 @@ class SegmentationTool(BaseTool):
     
 class AzureSegmentationTool(AzureTool):
     def __init__(self, config=None):
-        name = 'SegmentationTool'
-        description = f'Placeholder:{segment_image_with_prompt.__doc__}'
-        version = '0.1'
-        super().__init__(name, description, version, args, config)
+        # name = 'SegmentationTool'
+        # description = f'Placeholder:{segment_image_with_prompt.__doc__}'
+        # version = '0.1'
+        # args = {'input_prompt': 'str', 'input_image': 'PIL.Image.Image|str'}
+        super().__init__(
+            name='SegmentationTool',
+            description=f'Placeholder:{segment_image_with_prompt.__doc__}',
+            version='0.1',
+            args={'input_prompt': 'str', 'input_image': 'PIL.Image.Image|str'},
+            config=config
+        )
         self.tool_type = 'AU'
-        
-        subscription_id = self.workspace_client.subscription_id
-        resource_group = self.workspace_client.resource_group_name
-        workspace_name = self.workspace_client.workspace_name
+        self.tool_output = 'image'
+
+        self.client = MLClient.from_config(self.credential, file_name=config)
+
+        subscription_id = self.client.subscription_id
+        resource_group = self.client.resource_group_name
+        workspace_name = self.client.workspace_name
 
         self.registry: MLClient =  MLClient(
             self.credential,
@@ -155,12 +169,14 @@ class AzureSegmentationTool(AzureTool):
         # //  self.initialized: bool = False # Starts online endpoint only after 1st call
         # !^ Would overuse compute
     
-    async def run(self, input_prompt: str, input_image: Image.Image|str) -> Image.Image:
+    def run(self, input_prompt: str, input_image: Image.Image|str) -> Image.Image:
         from azure.ai.ml.entities import ManagedOnlineEndpoint, ManagedOnlineDeployment
         model = 'facebook-sam-vit-base'
         timestamp = int(time.time())
         foundation_model = self.registry.models.get(name=model, label="latest")
+
         online_endpoint_name = "mask-gen-" + str(timestamp)
+        deployment_name = 'sam_test'
         # Create an online endpoint
 
         endpoint = ManagedOnlineEndpoint(
@@ -170,8 +186,47 @@ class AzureSegmentationTool(AzureTool):
             + ", for mask-generation task",
             # auth_mode="key",
         )
-        with AzureEndpointContextManager(self.workspace_client, endpoint):
-                
+        with AzureEndpointContextManager(self.client, endpoint):
+            deployment = ManagedOnlineDeployment(
+                name=deployment_name,
+                endpoint_name=online_endpoint_name,
+                model=foundation_model.id,
+                instance_type="Standard_DS3_v2",  # Use GPU instance type like Standard_NC6s_v3 for faster inference
+                instance_count=1,
+                request_settings=OnlineRequestSettings(
+                    max_concurrent_requests_per_instance=1,
+                    request_timeout_ms=90000,
+                    max_queue_wait_ms=500,
+                ),
+                liveness_probe=ProbeSettings(
+                    failure_threshold=49,
+                    success_threshold=1,
+                    timeout=299,
+                    period=180,
+                    initial_delay=180,
+                ),
+                readiness_probe=ProbeSettings(
+                    failure_threshold=10,
+                    success_threshold=1,
+                    timeout=10,
+                    period=10,
+                    initial_delay=10,
+                ),
+            )
+            self.client.begin_create_or_update(deployment).wait()
+            endpoint.traffic = {deployment_name: 100}
+            self.client.begin_create_or_update(endpoint).result()
+
+            log(f'{endpoint.traffic=}')
+            log(f'{deployment=}')
+            log(f'{endpoint.scoring_uri=}')
+
+            img: Image.Image = open_image(input_image)
+            img_bytes = BytesIO()
+            img.save(img_bytes, format='PNG')
+            img_bytes.seek(0)
+            request_json = 
+
 
 async def main() -> None:
     """Runs module in test mode. Run the proper test in tests to see how to call the model properly"""
@@ -197,3 +252,11 @@ if __name__ == '__main__':
     asyncio.run(main())
     print('Finished')
     
+def main_azure() -> None:
+    """Runs module in test mode"""
+    # python -m GeoAwareGPT.tools.image_segment.segment
+    model = AzureSegmentationTool()
+    path = input('Enter path to image: ')
+    print('Started running image segmentation tool')
+    model.run('buildings', path)
+    print('Finished')

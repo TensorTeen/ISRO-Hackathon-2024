@@ -17,7 +17,7 @@ class BaseTool:
     """
 
     def __init__(self, name: str, description: str, version: str, args: Optional[dict] = None):
-        self.name = name
+        self.name: str = name
         self.description = description
         self.version = version
         self.args: dict = args or {} # argument: description(type)
