@@ -64,15 +64,15 @@ class AzureTool(BaseTool):
         
 
 
-        try:
-            self.credential = DefaultAzureCredential()
-            # do az login
-            # Check if given credential can get token successfully.
-            self.credential.get_token("https://management.azure.com/.default")
-        except ClientAuthenticationError as ex:
-            # Fall back to InteractiveBrowserCredential in case DefaultAzureCredential not work
-            # This will open a browser page for
-            self.credential = InteractiveBrowserCredential()
+        # try:
+        #     self.credential = DefaultAzureCredential()
+        #     # do az login
+        #     # Check if given credential can get token successfully.
+        #     self.credential.get_token("https://management.azure.com/.default")
+        # except ClientAuthenticationError as ex:
+        #     # Fall back to InteractiveBrowserCredential in case DefaultAzureCredential not work
+        #     # This will open a browser page for
+        #     self.credential = InteractiveBrowserCredential()
 
         # self.workspace_client: MLClient = MLClient.from_config(self.credential, file_name=config)
         
