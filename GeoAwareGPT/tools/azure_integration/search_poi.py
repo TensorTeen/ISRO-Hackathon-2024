@@ -10,21 +10,32 @@ load_dotenv()
 
 class SearchPOI(BaseTool):
     def __init__(self):
-        self.name = "search_poi"
-        self.description = (
-            "A tool to find the nearby landmarks given gecoded location and a query"
+        super().__init__(
+            name="search_poi",
+            description="A tool to find the nearby landmarks given gecoded location and a query",
+            version="1.0",
+            args={
+                "latitude": "latitude of the location for which address is needed(float)",
+                "longitude": "longitude of the location for which address is needed(float)",
+                "query": "query to search for nearby landmarks(str)",
+                "k": "(optional)number of landmarks to return(int)",
+            },
         )
-        self.version = "1.0"
-        self.args: dict = {
-            "latitude": "latitude of the location for which address is needed(float)",
-            "longitude": "longitude of the location for which address is needed(float)",
-            "query": "query to search for nearby landmarks(str)",
-            "k": "(optional)number of landmarks to return(int)",
-        }  # argument: description(type)
+        # self.name = "search_poi"
+        # self.description = (
+        #     "A tool to find the nearby landmarks given gecoded location and a query"
+        # )
+        # self.version = "1.0"
+        # self.args: dict = {
+        #     "latitude": "latitude of the location for which address is needed(float)",
+        #     "longitude": "longitude of the location for which address is needed(float)",
+        #     "query": "query to search for nearby landmarks(str)",
+        #     "k": "(optional)number of landmarks to return(int)",
+        # }  # argument: description(type)
         self.tool_type: str = "AUA"
 
     def run(self, latitude, longitude, query, k=3):
-        credential = AzureKeyCredential(os.getenv("AZURE_SUBSCRIPTION_KEY"))
+        credential = AzureKeyCredential(os.environ["AZURE_SUBSCRIPTION_KEY"])
         # Create a search client
         search_client = azsearch.MapsSearchClient(credential)
 

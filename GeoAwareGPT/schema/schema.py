@@ -1,5 +1,5 @@
-from typing import List
-
+from typing import List, Optional
+import os
 
 class BaseTool:
     """A base class representing a tool.
@@ -16,12 +16,13 @@ class BaseTool:
         __str__(): Returns a string representation of the tool.
     """
 
-    def __init__(self, name: str, description: str, version: str, args: dict = {}):
-        self.name = name
+    def __init__(self, name: str, description: str, version: str, args: Optional[dict] = None):
+        self.name: str = name
         self.description = description
         self.version = version
-        self.args: dict = args  # argument: description(type)
+        self.args: dict = args or {} # argument: description(type)
         self.tool_type: str = "AU"  # Assistant
+        self.tool_output = 'default'
 
     def run(self):
         """Abstract method to run the tool."""
@@ -30,23 +31,6 @@ class BaseTool:
     def __str__(self):
         """Returns a string representation of the tool."""
         return f"""{self.name}[args:{self.args}]: {self.description}"""
-
-
-class AzureTool(BaseTool):
-    def __init__(self, name: str, description: str, version: str, args: dict = {}):
-        super().__init__(name, description, version, args)
-        # self.tool_type = "AZ"
-        from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential
-
-        try:
-            self.credential = DefaultAzureCredential()
-            # do az login
-            # Check if given credential can get token successfully.
-            self.credential.get_token("https://management.azure.com/.default")
-        except Exception as ex:
-            # Fall back to InteractiveBrowserCredential in case DefaultAzureCredential not work
-            # This will open a browser page for
-            self.credential = InteractiveBrowserCredential()
 
 
 class ModelConfig:

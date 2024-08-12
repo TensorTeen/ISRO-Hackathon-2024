@@ -1,9 +1,13 @@
-from litellm import acompletion
 import os, sys
 import json
 from json import JSONDecodeError
-from .schema import GeminiModelConfig, ChatBuilder, BaseTool, BaseState
+from PIL import Image
+from typing import Dict
+
+from litellm import acompletion
 from dotenv import load_dotenv
+
+from .schema import GeminiModelConfig, ChatBuilder, BaseTool, BaseState
 from .ToolHandler import ToolHandler
 from GeoAwareGPT.schema.schema import ToolImageOutput
 
@@ -85,6 +89,7 @@ class Agent:
         response = await self.get_assistant_response()
         try:
             response = json.loads(response)
+            print(response)
         except:
             print(response)
         tool_calls = response["tool_calls"]
@@ -92,10 +97,10 @@ class Agent:
             return {}, {}, False, response["audio"]
         tool_results = await self.tool_handler.handle_tool(tool_calls)
         AUA = tool_results.get("AUA", False)
-        tool_results_display = {}
+        tool_results_display: Dict[str, Image.Image] = {}
         tool_results_text = {}
         for i in tool_results:
-            if isinstance(tool_results[i], ToolImageOutput):
+            if isinstance(tool_results[i], ToolImageOutput) or isinstance(tool_results[i], Image.Image):
                 tool_results_display[i] = tool_results[i]
                 tool_results_text[i] = "Image shown to user"
             else:

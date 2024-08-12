@@ -7,8 +7,9 @@ import io
 import math
 
 load_dotenv()
-
-credential = AzureKeyCredential(os.environ.get("AZURE_SUBSCRIPTION_KEY"))
+env = os.environ["AZURE_SUBSCRIPTION_KEY"]
+print(f'{env=}')
+credential = AzureKeyCredential(env)
 
 render_client = MapsRenderClient(
     credential=credential,

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Callable, Optional, Any
 import pickle
 
-DEBUG = False # Whether to log or not
+DEBUG = True # Whether to log or not
 LOG_DIR =  Path.joinpath(Path(Path(__file__).parent), 'log/')
 nl = '\n' # For <3.12 f-strings
 class Logger:
@@ -18,7 +18,7 @@ class Logger:
             raise OSError('Logging directory is not a directory (maybe a file)')
     def log(self, *args, new_section=False, **kwargs):
         """
-        Logs neatly. Makes an extra newline at the end. Use new_section
+        Logs neatly. Makes an extra newline at the end. Use new_section\
             if the logs should be separated more. Turned off if DEBUG is disabled
         """
         if not DEBUG: return

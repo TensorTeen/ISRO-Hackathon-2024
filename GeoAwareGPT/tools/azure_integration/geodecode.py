@@ -9,17 +9,18 @@ load_dotenv()
 
 class GeoDecode(BaseTool):
     def __init__(self):
-        self.name = "geodecode"
-        self.description = "A tool to decode the gecoded of an address. returns the address of the geocoded location"
-        self.version = "1.0"
         self.args: dict = {
             "latitude": "latitude of the location for which address is needed(float)",
             "longitude": "longitude of the location for which address is needed(float)",
         }  # argument: description(type)
+        super().__init__("geodecode", "A tool to decode the gecoded of an address. returns the address of the geocoded location", "1.0", self.args)
+        # self.name = "geodecode"
+        # self.description = "A tool to decode the gecoded of an address. returns the address of the geocoded location"
+        # self.version = "1.0"
         self.tool_type: str = "AUA"
 
     def run(self, latitude, longitude):
-        credential = AzureKeyCredential(os.getenv("AZURE_SUBSCRIPTION_KEY"))
+        credential = AzureKeyCredential(os.environ["AZURE_SUBSCRIPTION_KEY"])
         # Create a search client
         search_client = azsearch.MapsSearchClient(credential)
 
@@ -35,3 +36,8 @@ class GeoDecode(BaseTool):
 
         # Return the location
         return result.address
+
+if __name__ == '__main__':
+    # python -m GeoAwareGPT.tools.azure_integration.geodecode    
+    tool = GeoDecode()
+    print(tool.run(13.08784, 80.27847))
