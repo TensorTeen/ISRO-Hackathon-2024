@@ -72,22 +72,29 @@ def lat_long_to_tile_xy(latitude, longitude, zoom):
 
 class SatelliteImage(AzureTool):
     def __init__(self, config=None):
-        """Note: this authenticates with Entra or whatever"""
+        """Note: this authenticates with SKA"""
         super().__init__(
             config=config,
             name="satellite_image",
-            description="A tool to get satellite images from bounding box coordinates",
+            description="A tool to get satellite images from latitude, longitude and zoom level",
             version="0.1",
         )
         self.tool_type = "AU"
         self.tool_output = "image"
+        self.credential = AzureKeyCredential(os.environ['AZURE_SUBSCRIPTION_KEY'])
         self.render_client = MapsRenderClient(
             credential=self.credential,
-            client_id=os.environ['AZURE_CLIENT_ID'],
+            # client_id=os.environ['AZURE_CLIENT_ID'],
         )
         # self.ska = os.environ['AZURE_SUBSCRIPTION_KEY']
         # print(f'{self.ska=}')
     async def run(self, latitude: float, longitude: float, zoom: int) -> Image.Image:
+        """
+        Get satellite image from latitude, longitude
+
+        Args:
+            lati
+        """
         x, y = lat_long_to_tile_xy(latitude, longitude, zoom)
         get_tile = make_async(MapsRenderClient.get_map_tile)
         result: Iterator[bytes] = await get_tile(
