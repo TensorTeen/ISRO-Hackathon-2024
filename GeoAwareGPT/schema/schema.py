@@ -19,7 +19,7 @@ class BaseTool:
     """
 
     def __init__(
-        self, name: str, description: str, version: str, args: Optional[dict] = None
+        self, name: str, description: str, version: str, args: Optional[dict] = None,
     ):
         self.name: str = name
         self.description = description
