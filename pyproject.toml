@@ -15,6 +15,7 @@ python-dotenv = "^1.0.1"
 asyncio = "^3.4.3"
 segment-geospatial = "^0.10.6"
 sqlalchemy = "^2.0.31"
+langchain_community = "^0.2.12"
 
 [build-system]
 requires = ["poetry-core"]

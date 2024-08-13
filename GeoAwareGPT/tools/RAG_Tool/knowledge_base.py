@@ -1,25 +1,23 @@
+import os
+
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
-from ...schema import BaseTool
 from langchain_community.embeddings import AzureOpenAIEmbeddings
-import os
 from langchain.docstore.document import Document
 
+from ...schema import BaseTool
 
 class KnowledgeBase(BaseTool):
-    def __init__(self, **kwargs):
+    def __init__(self, pdf_location: str = os.environ["GEO_DATA_LOCATION"]):
         super().__init__(
             name="KnowledgeBase",
-            description="A knowledge base tool that can be used to retrive any information that you do not understand",
+            description="A knowledge base tool that can be used to retrieve any information that you do not understand",
             version="1.0",
             args={"query": "Query to the Knowledge Base (str)"},
         )
         self.tool_type = "AUA"
         self.vector_store = FAISS
-        self.document_path = kwargs.get(
-            "pdf_location",
-            r"D:\Workspace\GitRepos\ISRO-Hackathon-2024\tests\data\documents",
-        )
+        self.document_path = pdf_location
         self.titles = []
         self.pdf_loader = PyPDFLoader
         self.load_documents()

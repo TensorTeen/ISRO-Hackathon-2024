@@ -71,7 +71,7 @@ def segment_image_with_prompt(image: str|Image.Image, prompt: str,
     if not output:
         output = BytesIO()
     image = open_image(image)
-    sam = LangSAM()
+    sam = LangSAM('vit_b')
     out = sam.predict(image, prompt, 
                       box_threshold=bbox_threshold, 
                       text_threshold=text_threshold,
