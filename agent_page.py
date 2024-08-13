@@ -19,10 +19,11 @@ from GeoAwareGPT.tools.azure_integration import (
 )
 from GeoAwareGPT.tools.image_segment import SegmentationTool
 from GeoAwareGPT.tools.RAG_Tool import KnowledgeBase
-litellm.set_verbose = True # type: ignore
+from GeoAwareGPT.tools.database_integration.sql_bot import SQLGenerator
+litellm.set_verbose = False # type: ignore
 with open('./system_prompt.txt') as fh:
     SYSTEM_PROMPT = fh.read()
-tools = [GeoCode(), SearchPOI(), GeoDecode(), SatelliteImage(), SegmentationTool(), Weather(), KnowledgeBase()]
+tools = [GeoCode(), SearchPOI(), GeoDecode(), SatelliteImage(), Weather(), SQLGenerator()]
 states = [
     BaseState(
         name="GlobalState",
