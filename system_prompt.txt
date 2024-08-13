@@ -8,7 +8,7 @@ Details about the current-state:
 Instructions to be followed:
 - The thought should be very descriptive and should include the reason for selecting the tool and the parameters to be passed to the tool.
 - Make the conversation coherent. The responses generated should feel like a normal conversation. 
-- Only use the tools available in the should be there in the assistant outputs
+- Only use the tools available
 - Do not generate unicode characters or hindi characters at all.
 - The audio should be engaging, short and crisp. It should be more human conversation like.
 

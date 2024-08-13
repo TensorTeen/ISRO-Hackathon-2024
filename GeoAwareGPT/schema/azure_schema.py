@@ -1,12 +1,7 @@
 from typing import Self, Optional
 import os
 
-from azure.ai.ml.entities import ManagedOnlineEndpoint, ManagedOnlineDeployment
-from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential
-from azure.core.exceptions import ClientAuthenticationError
-from azure.core.credentials import AzureKeyCredential
-from azure.ai.ml import MLClient
-from azure.ai.ml.exceptions import ValidationException
+
 
 from .schema import BaseTool
 
@@ -15,14 +10,14 @@ class AzureEndpointContextManager:
     Important class to prevent leaving an endpoint running. ot really
         intended to be modified
     """
-    def __init__(self, workspace_client: MLClient, endpoint: ManagedOnlineEndpoint):
-        self.client = workspace_client
-        self.endpoint = endpoint
-    def __enter__(self) -> Self:
-        self.client.begin_create_or_update(self.endpoint).wait()
-        return self
-    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
-        self.client.online_endpoints.begin_delete(name=self.endpoint.name).wait()
+    # def __init__(self, workspace_client: MLClient, endpoint: ManagedOnlineEndpoint):
+    #     self.client = workspace_client
+    #     self.endpoint = endpoint
+    # def __enter__(self) -> Self:
+    #     self.client.begin_create_or_update(self.endpoint).wait()
+    #     return self
+    # def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
+    #     self.client.online_endpoints.begin_delete(name=self.endpoint.name).wait()
 
 # class AzureMLClient(MLClient):
 #     """Slightly modified class to allow use of context managers for endpoints.

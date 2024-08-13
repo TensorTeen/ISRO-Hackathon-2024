@@ -107,9 +107,13 @@ class SegmentationTool(BaseTool):
             test_schema (bool): In case you just want to check schema
         """
         name = 'SegmentationTool'
-        description = f'{self.run.__doc__}'
+        description = 'Segment an image based on a text prompt. \
+\nGiven an image and a prompt, it highlights all parts of the \
+\nimage corresponding to the prompt'
         version = '0.1'
-        super().__init__(name, description, version)
+        super().__init__(name, description, version,
+                         args={'input_prompt': 'The class which should be segmented. (str)',
+                               'input_image': 'The input image to be segmented. (PIL.Image.Image)'})
         self.test = test_schema
         self.tool_type = 'AU'
         if self.test:
@@ -123,7 +127,7 @@ class SegmentationTool(BaseTool):
         Segment an image based on a text prompt. 
 
         Args:
-            input_prompt (str): The input text. 
+            input_prompt (str): The class which should be segmented. 
                 Should preferably be a single word, as the model struggles with logic
             input_image (PIL.Image.Image): An input image.
 
@@ -134,6 +138,14 @@ class SegmentationTool(BaseTool):
             Runtime Error: If the input image can't be loaded by PIL
         """
         # str is for testing
+        if self.test:
+            if not isinstance(input_prompt, str):
+                raise TypeError('incorrect input prompt')
+            if not isinstance(input_image, Image.Image):
+                log(f'{type(input_image).mro()=}')
+                print(f'{type(input_image).mro()=}')
+                raise TypeError('Not an image')
+            return ToolImageOutput(input_image)
         result = await asyncio.to_thread(segment_image_with_prompt, input_image, input_prompt, recovery_if_error=False, test=self.test)
         # works
         return ToolImageOutput(result)
