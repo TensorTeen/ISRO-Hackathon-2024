@@ -20,15 +20,20 @@ from GeoAwareGPT.tools.azure_integration import (
 from GeoAwareGPT.tools.image_segment import SegmentationTool
 from GeoAwareGPT.tools.RAG_Tool import KnowledgeBase
 from GeoAwareGPT.tools.database_integration.sql_bot import SQLGenerator
+
+from asr_tts import Speech
+
+
 litellm.set_verbose = False # type: ignore
 with open('./system_prompt.txt') as fh:
     SYSTEM_PROMPT = fh.read()
-tools = [GeoCode(), SearchPOI(), GeoDecode(), SatelliteImage(), Weather(), SQLGenerator()]
+tools = [GeoCode(), SearchPOI(), GeoDecode(), SatelliteImage(), Weather(), KnowledgeBase(), SQLGenerator()]
 states = [
     BaseState(
         name="GlobalState",
         goal="To Answer the user's query regarding geography using the tools available to the assistant",
-        instructions="1.CALL ONE TOOL AT A TIME and respond to the user with the information fetched from the tool. If the query requires you to decide based on some information or if it involves Geo-Technical Terms that you need to calculate then use the TOOL:KnowledgeBase to get the information about it and use that information to take the decision as a whole. YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION. Only if you are sure that you have answered the user's query then do not call any tools",
+        instructions="1.CALL ONE TOOL AT A TIME and respond to the user with the information fetched from the tool. If the query requires you to decide based on some information or if it involves Geo-Technical Terms that you need to calculate then use the "\
+            +("TOOL:KnowledgeBase to get the information about it and use that information to take the decision as a whole." if (False and any((isinstance(tool, KnowledgeBase) for tool in tools))) else "") + "YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION. Only if you are sure that you have answered the user's query then do not call any tools",
         tools=tools,
     )
 ]
@@ -45,11 +50,29 @@ if "initialized" not in st.session_state or not st.session_state.initialized:
     st.session_state.initialized = True
     st.session_state.agent.set_system_prompt(SYSTEM_PROMPT)
     st.session_state.AUA = cast(bool, True)
+    st.session_state.mic = None
 
 st.title("GeoAwareGPT")
 st.write(
     "Welcome to GeoAwareGPT, your friendly conversational assistant for geography-related queries."
 )
+def on_microphone():
+    audio_input = st.chat_input("Please speak...")
+    if not language.split('-')[0] == 'en':
+        result, _ = translator.translate_speech(language, 'en')
+        st.session_state.mic = result
+    else:
+        user_input = translator.recognize_from_microphone()
+        st.session_state.mic = user_input
+with st.sidebar:
+    lang_map = {
+        'en-US': 'en-US',
+        'हिन्दी': 'hi-IN'
+    }
+    language: str = st.selectbox('Language', ('en-US', 'हिन्दी'))
+    language = lang_map[language]
+    microphone = st.button('Microphone', on_click=on_microphone)
+    audio_output = st.toggle('Audio Output')
 for user_input in st.session_state.messages:
     with st.chat_message(user_input["role"]):
         content = user_input["content"]
@@ -64,20 +87,36 @@ img_file: Optional[io.BytesIO] = st.file_uploader(
     "Upload an Image", accept_multiple_files=False, type="png"
 )
 image_input: Optional[Image.Image] = Image.open(img_file) if img_file else None
-user_input = st.chat_input("Please enter your query...")
 if image_input:
     agent.add_input_image(image_input) # ! Must be done before query
     st.session_state.messages.append({
         "role": "User",
         "content": image_input
     })
+translator = Speech()
+if st.session_state.mic:
+    if not language.split('-')[0] == 'en':
+        result = st.session_state.mic
+        user_input = result.text
+    else:
+        user_input = st.session_state.mic
+    st.session_state.mic = None
+else:
+    user_input = st.chat_input("Please enter your query...")
+    if user_input and language.split('-')[0] != 'en':
+        user_input = translator.translate_text(user_input, from_language=language, to_language='en')
 # user_input = st.text_input("User Query", "")
 if user_input:
-    with st.chat_message('User'):
-        st.markdown(f'{user_input}')
-    st.session_state.messages.append({"role": "User", "content": user_input})
+    if not microphone:
+        with st.chat_message('User'):
+            st.markdown(f'{user_input}')
+        st.session_state.messages.append({"role": "User", "content": user_input})
+    else:
+        with st.chat_message('User'):
+            st.markdown(f'{user_input}')
+        st.session_state.messages.append({"role": "User", "content": user_input})
     c = 0
-    agent.add_user_message(user_input)
+    agent.add_user_message(user_input if language.split('-')[0] == 'en' else result.translations['en'])
     while True:
         print("Iteration:", c)
         if c > 10:
@@ -93,7 +132,11 @@ if user_input:
                         "content": img.image
                     })
             with st.chat_message('Audio'):
+                if not language.split('-')[0] == 'en':
+                    audio = translator.translate_text(audio)
                 st.markdown(f'Audio: {audio}')
+                if audio_output:
+                    translator.text_to_speech(audio, language.split('-')[0]+'-IN')
             with st.chat_message('Assistant'):
                 st.markdown(f'Tool Result: {text}')
             st.session_state.messages.append({"role": "Assistant", "content": text})

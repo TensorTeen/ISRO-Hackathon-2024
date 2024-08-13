@@ -10,3 +10,4 @@ config.json
 azure_config.json
 .config
 test*.png
+poetry.lock
