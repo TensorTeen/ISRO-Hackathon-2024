@@ -7,6 +7,8 @@ from GeoAwareGPT.tools.azure_integration import (
     GeoDecode,
     SatelliteImage,
 )
+from GeoAwareGPT.tools.azure_integration.weather import Weather
+from GeoAwareGPT.tools.RAG_Tool.knowledge_base import KnowledgeBase
 import asyncio, json
 from json import JSONDecodeError
 import litellm
@@ -44,12 +46,19 @@ Respond to the user in the conversation strictly following the below JSON format
     "audio": "...",  # Audio response in simple, short, sentence segmented format
 }
 """
-tools = [GeoCode(), SearchPOI(), GeoDecode(), SatelliteImage()]
+tools = [
+    GeoCode(),
+    SearchPOI(),
+    GeoDecode(),
+    SatelliteImage(),
+    Weather(),
+    KnowledgeBase(),
+]
 states = [
     BaseState(
         name="GlobalState",
         goal="To Answer the user's query regarding geography using the tools available to the assistant",
-        instructions="1.CALL ONE TOOL AT A TIME and respond to the user with the information fetched from the tool. YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION. If you have answered the user's query then do not call any tools",
+        instructions="1.CALL ONE TOOL AT A TIME and respond to the user with the information fetched from the tool. If the query requires you to decide based on some information or if it involves Geo-Technical Terms that you need to calculate then use the TOOL:KnowledgeBase to get the information about it and use that information to take the decision as a whole. YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION. If you have answered the user's query then do not call any tools",
         tools=tools,
     )
 ]
