@@ -1,0 +1,42 @@
+--- Page 1 ---
+Ver. 1
+NRSC/ISRO
+2.2 Plantations: These are the areas under agricultural tree crops planted adopting agricultural
+management techniques. Depending on the location, they are exhibit a dispersed or contiguous
+pattern. Use of multi-season data will enable their separation in a better way. It includes
+agricultural plantation (like tea, coffee, rubber etc.) horticultural plantation (like coconut, arecanut,
+citrus fruits, orchards, fruits, ornamental shrubs and trees, vegetable gardens etc.) and agro-
+horticultural plantation.
+2.3 Fallow: An agricultural system with an alternation between a cropping period of several
+years and a fallow period. (Ruthenberg, 1980). In another terms these are the lands, which are
+taken up for cultivation but are temporarily allowed to rest, un-cropped for one or more
+season, but not less than one year.
+2.4 Current Shifting Cultivation areas: This describes the growing of crops for a few years on
+selected and clear plots, alternating with a lengthy period of vegetative fallow when the soil is
+rested. The land is cultivated for less than 33 percent of the time (Ruthenberg, 1980). This cover
+is followed by the vegetative and / or bare cover of the fallow period that can last for several years
+(Shaneret. Al., 1982). These are the areas which are clearly perceptible on the satellite image that
+are in pre-burnt /post-burnt condition as bright white or with bluish small irregular patches amidst
+forest patches that are red in colour.
+3.0 FOREST
+The term forest is used to refer to land with a tree canopy cover of more than 10 percent and
+area of more than 0.5 ha. Forests are determined both by the presence of trees and the absence
+of other predominant land uses. The trees should be able to reach a minimum height of 5 m (MOEF,
+2011). It consists of:
+3.1 Evergreen/Semi-Evergreen: This term as such describes the phenology of perennial plants
+that are never entirely without green foliage (Ford-Robertson, 1971). This category comprises of
+tall trees, which are predominantly remain green throughout the year. It includes both
+coniferous and tropical broadleaved evergreen species. Semi- evergreen is a forest type that
+includes a combination of evergreen and deciduous species with the former dominating the
+canopy cover.
+3.2 Deciduous: This applies to the phenology of perennial plants that are leafless for a certain
+period of the year (Ford-Robertson, 1971). The leaf shedding usually takes place simultaneously
+in connection with the unfavorable season (UNESCO, 1973).
+These are the forest types that are predominantly composed of species, which shed their leaves
+once a year, especially during summer. It also includes tree clad area with tree cover lying
+outside the notified forest boundary areas that are herbaceous with a woody appearance (e.g.
+bamboos, palms, tree ferns etc.).
+3.3. Forest Plantation: These are the areas of tree species of forestry importance, raised and
+managed especially in notified forest areas. The species mainly constitute teak, Sal, eucalyptus,
+5
+

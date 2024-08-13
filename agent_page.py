@@ -6,6 +6,7 @@ from typing import cast, Optional
 import io
 
 import streamlit as st
+
 import litellm
 
 from GeoAwareGPT import Agent, GeminiModel, GeminiModelConfig, ToolHandler
@@ -17,18 +18,38 @@ from GeoAwareGPT.tools.azure_integration import (
     SatelliteImage,
     Weather,
 )
+from GeoAwareGPT.tools.azure_integration.find_distance import FindDistance
 from GeoAwareGPT.tools.image_segment import SegmentationTool
 from GeoAwareGPT.tools.RAG_Tool import KnowledgeBase
 from GeoAwareGPT.tools.database_integration.sql_bot import SQLGenerator
-litellm.set_verbose = False # type: ignore
-with open('./system_prompt.txt') as fh:
+
+litellm.set_verbose = True  # type: ignore
+with open("./system_prompt.txt") as fh:
     SYSTEM_PROMPT = fh.read()
-tools = [GeoCode(), SearchPOI(), GeoDecode(), SatelliteImage(), Weather(), SQLGenerator()]
+tools = [
+    GeoCode(),
+    SearchPOI(),
+    GeoDecode(),
+    SatelliteImage(),
+    Weather(),
+    KnowledgeBase(),
+    SegmentationTool(),
+    FindDistance(),
+    SQLGenerator(),
+]
 states = [
     BaseState(
         name="GlobalState",
         goal="To Answer the user's query regarding geography using the tools available to the assistant",
+<<<<<<< Updated upstream
         instructions="1.CALL ONE TOOL AT A TIME and respond to the user with the information fetched from the tool. YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION. Only if you are sure that you have answered the user's query then do not call any tools",
+=======
+        instructions="""- CALL ONLY ONE TOOL AT A TIME and respond to the user with the information fetched from the tool.
+        - If the query requires you to decide based on some information or if it involves Geo-Technical Terms that you need to calculate then use the TOOL:KnowledgeBase to get the information about it and use that information to take the decision as a whole. 
+        - YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION. Only if you are sure that you have answered the user's query then do not call any tools. 
+        - Call tool with the right argument types. Use float or int for any numerical inputs
+        - Give detailed answer about the query asked by the user, try to answer and solve the query as much as possible using the data available through different tools""",
+>>>>>>> Stashed changes
         tools=tools,
     )
 ]
@@ -66,15 +87,12 @@ img_file: Optional[io.BytesIO] = st.file_uploader(
 image_input: Optional[Image.Image] = Image.open(img_file) if img_file else None
 user_input = st.chat_input("Please enter your query...")
 if image_input:
-    agent.add_input_image(image_input) # ! Must be done before query
-    st.session_state.messages.append({
-        "role": "User",
-        "content": image_input
-    })
+    agent.add_input_image(image_input)  # ! Must be done before query
+    st.session_state.messages.append({"role": "User", "content": image_input})
 # user_input = st.text_input("User Query", "")
 if user_input:
-    with st.chat_message('User'):
-        st.markdown(f'{user_input}')
+    with st.chat_message("User"):
+        st.markdown(f"{user_input}")
     st.session_state.messages.append({"role": "User", "content": user_input})
     c = 0
     agent.add_user_message(user_input)
@@ -88,14 +106,13 @@ if user_input:
             if image:
                 for img in image.values():
                     st.image(img.image, use_column_width=True)
-                    st.session_state.messages.append({
-                        "role": "Assistant",
-                        "content": img.image
-                    })
-            with st.chat_message('Audio'):
-                st.markdown(f'Audio: {audio}')
-            with st.chat_message('Assistant'):
-                st.markdown(f'Tool Result: {text}')
+                    st.session_state.messages.append(
+                        {"role": "Assistant", "content": img.image}
+                    )
+            with st.chat_message("Audio"):
+                st.markdown(f"Audio: {audio}")
+            with st.chat_message("Assistant"):
+                st.markdown(f"Tool Result: {text}")
             st.session_state.messages.append({"role": "Assistant", "content": text})
             st.session_state.messages.append({"role": "Audio", "content": audio})
             st.session_state.AUA = AUA

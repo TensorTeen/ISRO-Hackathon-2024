@@ -38,4 +38,3 @@ class GeoCode(BaseTool):
 
         # Return the location
         return result.position
-

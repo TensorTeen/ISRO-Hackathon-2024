@@ -1,0 +1,49 @@
+--- Page 1 ---
+NRSC/ISRO
+Ver. 1
+DATASETS
+Resourcesat-2 terrain corrected data from LISSIII sensor of 3 seasons pertaining to 2015-16
+and LULC Vector of 2011-12 are used in this study.
+Monsoon Season - Kharif
+Post-Monsoon - Rabi
+Pre-Monsoon - Zaid
+: August - October
+: December - March
+: April - May
+The specific path and row of the satellite data along with date of pass will be displayed when the
+user is querying the map.
+SUGGESTED USE:
+The LULC maps should be used at broad level for the following purposes:
+· Scientific research involving carbon cycle, hydrologic cycle, energy budget studies,
+weather / climate prediction etc .;
+· Siting of industries, SEZs etc .;
+· Land improvement programmes;
+· Watershed management;
+· Coastal zone management;
+· Agricultural productivity improvement and
+DISCLAIMER
+· Different land use and land cover classes accuracies are subjected availability of
+appropriate biological windows of satellite data.
+· Data cannot be used for any legal purpose.
+· User shall exercise reasonable skill, care and diligence while using the information and
+will keep indemnified NRSC/ISRO in respect of any loss, damage or claim howsoever
+arising out of use of this information.
+USER RESTRICTION
+I.
+Database should be used at scales smaller than 1:100,000
+II.
+User of this data/information will consult NRSC to commercially exploit / use the
+intellectual property generated in the Projects.
+CONTRIBUTORS
+S.No
+Partner Institution
+1
+29 Partner Institutions (Annexure - I)
+Project Co-ordination
+Land Use & Cover Monitoring Division
+LRUMG, Remote Sensing Applications Area
+National Remote Sensing Centre
+Dept. of Space, Govt. of India
+Balanagar, HYDERABAD - 500 037
+8
+

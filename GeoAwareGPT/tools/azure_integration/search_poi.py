@@ -12,7 +12,7 @@ class SearchPOI(BaseTool):
     def __init__(self):
         super().__init__(
             name="search_poi",
-            description="A tool to find the nearby landmarks given gecoded location and a query",
+            description="A tool to find the nearby landmarks given gecoded location and a. Give the user details about the nearby landmarks",
             version="1.0",
             args={
                 "latitude": "latitude of the location for which address is needed(float)",
@@ -21,6 +21,7 @@ class SearchPOI(BaseTool):
                 "k": "(optional)number of landmarks to return(int)",
             },
         )
+        self.tool_type = "AUA"
         # self.name = "search_poi"
         # self.description = (
         #     "A tool to find the nearby landmarks given gecoded location and a query"
@@ -34,7 +35,7 @@ class SearchPOI(BaseTool):
         # }  # argument: description(type)
         self.tool_type: str = "AUA"
 
-    def run(self, latitude, longitude, query, k=3):
+    def run(self, latitude, longitude, query, k=15):
         credential = AzureKeyCredential(os.environ["AZURE_SUBSCRIPTION_KEY"])
         # Create a search client
         search_client = azsearch.MapsSearchClient(credential)
@@ -44,7 +45,11 @@ class SearchPOI(BaseTool):
             coordinates=(latitude, longitude), query=query.upper()
         )
         if not results.results:
+<<<<<<< Updated upstream
             return []
+=======
+            return {"tool_results": "No results found"}
+>>>>>>> Stashed changes
 
         # Get the first result
         result = [
