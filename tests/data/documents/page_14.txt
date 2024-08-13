@@ -1,0 +1,3 @@
+Econometric statistic 'X'
+To calculate 'X', multiply the total railway length in that region by the GDP.
+The 'X' statistic is a dummy statistic used to depict any econometric statistic.

@@ -64,8 +64,8 @@ class KnowledgeBase(BaseTool):
             self.pages,
             AzureOpenAIEmbeddings(
                 chunk_size=3000,
-                azure_deployment="azure-text-embedding",
-                azure_endpoint="https://azure-geoaware-gpt.openai.azure.com/",
+                azure_deployment="textembedding",
+                azure_endpoint="https://geoawaregptfour.openai.azure.com/",
             ),
         )
 
