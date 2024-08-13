@@ -113,6 +113,7 @@ class SatelliteImage(AzureTool):
             x=x,
             y=y,
             z=zoom,
+            tile_size='512'
         )
 
         @make_async

@@ -1,8 +1,10 @@
 import os, sys
 import json
 from json import JSONDecodeError
+import jsonschema
 from PIL import Image
-from typing import Dict
+from typing import Dict, Tuple, List, Any, Sequence, cast
+import re
 
 from litellm import acompletion
 from dotenv import load_dotenv
@@ -54,59 +56,85 @@ class GeminiModel(Model):
 class Agent:
     def __init__(
         self,
-        states: BaseState,
+        states: List[BaseState],
         model: Model | None = None,
     ) -> None:
         self.model = model or GeminiModel()
         self.messages = ChatBuilder()
         self.states: list[BaseState] = states
         self.tool_handler = ToolHandler(tools=self.states[0].tools)
+        self.images: List[Image.Image] = []
 
     def set_system_prompt(self, prompt: str):
         self.messages.system_message(prompt + "\n" + str(self.states[0]))
 
     def add_user_message(self, message: str):
-        self.messages.user_message(message)
+        if self.images:
+            message = f"""{message}
+The user has uploaded the following images: {', '.join((f'image_{i}' for i in range(len(self.images))))}
+An image can be inserted as an argument directly - "args": {{"<arg_name>": "$image_1$"}}"""
+            self.messages.user_message(message)
+        else:
+            self.messages.user_message(message)
 
     def add_assistant_message(self, message: str):
         self.messages.assistant_message(message)
+    
+    def add_input_image(self, image: Image.Image):
+        self.images.append(image)
 
     async def get_assistant_response(self):
         print(self.messages.chat)
         response = await self.model.generate(self.messages)
-        if response and response.choices:
-            answer = response.choices[0].message.content
+        if response and response.choices: # type: ignore
+            answer: str = response.choices[0].message.content # type: ignore
         else:
             raise RuntimeError("No response from the model")
         self.add_assistant_message(answer)
         return answer
 
-    def add_tool(self, tool: BaseTool):
-        self.tools.append(tool)
+    def add_tool(self, tool: BaseTool|Sequence[BaseTool]):
+        self.tool_handler.add_tool(tool)
 
-    async def agent_loop(self):
-        print(self.messages.chat)
-        response = await self.get_assistant_response()
+    def extract_info(self, response: str) -> Tuple[List[Dict[str, str|Dict[str, Any]]], Dict[str, str]]:
+        """Deal with images and potentially other placeholders
+        
+        Returns:
+            tools (List) - tool_calls after json.loads  
+            info (Dict) - remaining response
+        """
+
+        response = re.sub(r'"\$image_(?P<num>[0-9]+)\$"', '"<image_\g<num>>"', response) # type: ignore
         try:
-            response = json.loads(response)
-            print(response)
-        except:
-            print(response)
-        tool_calls = response["tool_calls"]
+            info: Dict = json.loads(response)
+            tools: List[Dict[str, str|Dict[str, Any]]]
+            tools = info.pop('tool_calls')
+        except JSONDecodeError as e:
+            nl = '\n'
+            raise ValueError('Invalid JSON') from e
+        for tool in tools:
+            args: Dict[str, Any] = cast(Dict[str, Any], tool['args'])
+            for arg, val in args.items():
+                if isinstance(val, str) and (img := re.match(r'<image_(?P<num>[0-9]+)>', val)):
+                    args[arg] = self.images[int(img.group('num'))]
+        return tools, info
+
+    async def agent_loop(self) -> Tuple[Dict[str, ToolImageOutput], Dict[str, str], bool, str]:
+        print(self.messages.chat)
+        response: str|Dict[str, Any] = await self.get_assistant_response()
+        tool_calls, response = self.extract_info(response)
         if not tool_calls:
             return {}, {}, False, response["audio"]
         tool_results = await self.tool_handler.handle_tool(tool_calls)
         AUA = tool_results.get("AUA", False)
-        tool_results_display: Dict[str, Image.Image] = {}
+        tool_results_display: Dict[str, ToolImageOutput] = {}
         tool_results_text = {}
-        for i in tool_results:
-            if isinstance(tool_results[i], ToolImageOutput) or isinstance(
-                tool_results[i], Image.Image
-            ):
-                tool_results_display[i] = tool_results[i]
-                tool_results_text[i] = "Image shown to user"
+        for key in tool_results:
+            if isinstance(out := tool_results[key], ToolImageOutput):
+                self.add_input_image(out.image)
+                tool_results_display[key] = out
+                tool_results_text[key] = "Image shown to user"
             else:
-                tool_results_text[i] = str(tool_results[i])
-            print(f"{i}: {tool_results_text[i]}")
+                tool_results_text[key] = str(tool_results[key])
         self.add_user_message(str({"tool_results": json.dumps(tool_results_text)}))
         return tool_results_display, tool_results_text, AUA, response["audio"]
