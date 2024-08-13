@@ -1,0 +1,21 @@
+--- Page 1 ---
+NRSC/ISRO
+Ver.1
+REFERENCES
+1. NRSA, (2006), Manual of National Land Use Land Cover Mapping Using Multi-Temporal
+Satellite Data, Department of Space, Hyderabad
+2. NRSA, (2007), Manual of National Wastelands Monitoring Using Multi-temporal Satellite
+Data, Department of Space, Hyderabad
+3. Di Gregorio, A., and Jansen, L.J.M. (2004). Land Cover Classification System.
+Classification Concepts and User Manual, version 2, United Nations Food and
+Agriculture Organization, Rome
+4. www.envfor.nic.in/divisions/fp/Evo def.doc
+5. UNESCO. 1973. International Classification and Mapping of Vegetation. Paris
+6. Ford-Robertson, F.C. (ed). 1971. Terminology of Forest Science, Technology Practice
+and Products. Society of American Foresters, Washington, DC
+7. NRSC, (2011), Land Use Land Cover Atlas of India (Based on Multi-temporal Satellite
+Data of 2005-2006), Department of Space, ISRO, GOI, Hyderabad
+8. NRSC, (2012), Manual of National Land Use/Land Cover Mapping (Second Cycle)
+Using Multi-temporal Satellite Data, Department of Space, Hyderabad
+10
+

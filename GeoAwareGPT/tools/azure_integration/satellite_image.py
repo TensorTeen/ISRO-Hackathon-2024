@@ -109,17 +109,13 @@ class SatelliteImage(AzureTool):
         """
         x, y = lat_long_to_tile_xy(latitude, longitude, zoom)
         get_tile = make_async(MapsRenderClient.get_map_tile)
-        try:
-            result: Iterator[bytes] = await get_tile(
-                self.render_client,
-                tileset_id="microsoft.imagery",
-                x=x,
-                y=y,
-                z=zoom,
-                # // tile_size=MapTileSize.SIZE512, # ! Highly inconsistent
-            )
-        except HttpResponseError as e:
-            raise e
+        result: Iterator[bytes] = await get_tile(
+            self.render_client,
+            tileset_id="microsoft.imagery",
+            x=x,
+            y=y,
+            z=zoom,
+        )
 
         @make_async
         def load_image(result: Iterator[bytes]) -> Image.Image:

@@ -1,0 +1,84 @@
+--- Page 1 ---
+NRSC/ISRO
+Ver.1
+National Remote Sensing Centre
+Document Control Sheet
+01.
+Security Classification
+02.
+Distribution
+General
+03.
+Document Version
+(a) Issue no. 01
+04.
+Document Type
+Technical Report - Ver. 1
+Document Control
+Number
+NRSC-RSA-LRUMG-JUN-2019-TR-1320-V1.0
+05.
+06.
+Title
+Natural Resource Census - Land Use / Land Cover Database for
+Dissemination through Bhuvan
+07.
+Particulars of Collation
+Pages - 11
+08.
+Author(s)
+Dr. Manoj Raj Saxena, Shri. Rajiv Kumar, Shri. J Chandra Mohan, Dr. Divya
+Vijayan, Shri. Mohit Modi, Shri. Dhiroj Kumar Behera, Dr. Kuntal Ganguly, Ms
+Ravali Bhardwaj, Ms. V Satya Sahithi, Ms. P. Harshitha, Ms. Isharat Begum
+09.
+Affiliation of Authors
+LU & CM Division, LRUM Group, Remote Sensing Applications Area, NRSC
+10.
+Scrutiny Mechanism
+Compiled By:
+Dr. G Ravi Shankar, Head,
+LU & CMD
+11.
+Originating Unit
+LU&CMD,LRUMG, RSA A
+12.
+Sponsor(s)/Name &
+Address
+NNRMS, ISRO, Bengaluru
+13.
+Date of Initiation
+June, 2019
+14.
+Date of Publication
+June, 2019
+15.
+Abstract(with
+Keywords)
+Unrestricted
+(b)Revision
+&Date
+--
+Figures
+Tables - 2
+References - 8
+Reviewed By:
+Dr. T Ravisankar,
+GD,LRUM
+Approved / Controlled
+By:
+Dr. PVN Rao, DD RSA A
+The geo-spatial database on "Land Use/ Land Cover (Third Cycle) on
+1:50,000 scale" is prepared using three season Resourcesat-2 ortho
+rectified LISS-III data of 2015-16. Entire database are prepared by
+NRSC, ISRO under Natural Resources Census (NRC) Project of National
+Natural Resources Repository (NRR) Programme with the participation
+of 29 State Remote Sensing Centers spread over entire country.
+Interpretation of satellite imagery is done using visual interpretation
+technique and individual classes were interpreted using their visual
+characteristics. The LULC database is prepared with 54 class LULC
+Classification Schema and are harmonized to 24 class for disseminating
+through Bhuvan, ISRO Geoportal by emphasing more on Land Cover.
+Output is in GIS vector file format, prepared using LCC projection and
+WGS84 as datum. This will serve the requirements of academia,
+researchers, planners etc.
+

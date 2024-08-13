@@ -3,8 +3,9 @@ from typing import Optional, Dict, Any, Sequence
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, session
-from GeoAwareGPT import Agent, GeminiModel, GeminiModelConfig
+from GeoAwareGPT import Agent, GeminiModel, GeminiModelConfig, AzureModel, AzureModelConfig
 from GeoAwareGPT.schema import BaseTool, BaseState
+import re
 import sys
 import asyncio
 import json
@@ -59,7 +60,7 @@ PostGIS extends PostgreSQL to support geographic objects. Here are some of the k
 
 These functions can be used to perform complex geospatial analyses and queries, enhancing the capabilities of your database with spatial data.
 
-Given below are table names and their corresponding column names with example values. You are to only use the column and table names mentioned below  and using the example values figure out which columns to use. while doing string comparisons convert both sides to lower case. ENSURE THAT TABLE NAMES AND FIELD NAMES ARE VALID. Return 'CANNOT_SOLVE' in the sql_query in case the query is not solvable with the given database, only if you are confident that it cannot be solved. Do not complicate the queries.
+Given below are table names and their corresponding column names with example values. You are to only use the column and table names mentioned below. While doing string comparisons convert both sides to lower case. ENSURE THAT TABLE NAMES AND FIELD NAMES ARE VALID. Return 'CANNOT_SOLVE' in the sql_query in case the query is not solvable with the given database, only if you are confident that it cannot be solved. Make sure to add a where clause to ensure that you're not returning NULL values, eg. WHERE name IS NOT NULL. Do not complicate the query.
 """
 
 
@@ -77,10 +78,10 @@ class SQLGenerator(BaseTool):
             session (sqlalchemy.orm.sessionmaker): SQLAlchemy session
         """
         name = 'SQLGenerator'
-        description = """Generates and executes SQL queries on a POSTGIS database containing the following tables: city boundaries, land use, aadhaar enrolment centres, waterways, natural, points, places, buildings
+        description = """Generates and executes SQL queries on a POSTGIS database containing the following tables: city boundaries, land use, aadhaar enrolment centres, waterways, natural, points, places, buildings. This requires geocoded data (latitude and longitude) for queries involving other places.
         """
         args = {
-            "instructions": "Give detailed instructions on what the query should accomplish. The SQL generator will be given the database schema and the natural language instructions that you provide."
+            "instructions": "Give detailed instructions on what the query should accomplish. The SQL generator will be given the database schema and the natural language instructions. ENSURE THAT COORDINATES ARE INCLUDED IN THE INSTRUCTIONS FOR ANY PLACE."
         }
         version = '0.1'
         super().__init__(name, description, version, args)
@@ -104,7 +105,7 @@ class SQLGenerator(BaseTool):
             BaseState(
                 name="GlobalState",
                 goal="To generate an SQL query to extract the relevant information from a geospatial POSTGIS database.",
-                instructions="YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION.",
+                instructions="YOUR OUTPUT SHOULD BE GROUNDED ON THE DATABASE SCHEMA, DO NOT HALLUCINATE INFORMATION.",
                 tools=[],
             )
         ]
@@ -139,13 +140,25 @@ class SQLGenerator(BaseTool):
         with self.session() as session:
             success_flag = False
             self.agent.add_user_message(instructions)
+            count = 0
             while not success_flag:
+                if count==5:
+                    return None
+                count+=1
                 response = await self.agent.get_assistant_response()
+                pattern = '```json(.*?)```'
+                matches = re.findall(pattern, response, re.DOTALL)
+                json_string = matches[-1].strip() if matches else response
                 try:
-                    response = json.loads(response)
+                    response = json.loads(json_string)
                     sql = response['sql_query']
                 except:
-                    self.agent.add_user_message("ERROR: Invalid JSON. Please enter a valid JSON following the instructions provided")
+                    print("Invalid JSON!!!")
+                    print(response)
+                    self.agent.add_user_message("""ERROR: Invalid JSON. Please enter a valid JSON following the instructions provided, in the same JSON format. {
+                                                    "thought": "...",  # Thought process of the bot to decide what content to reply with, which tool(s) to call, briefly describing reason for tool arguments as well
+                                                    "sql_query": "..."  # SQL query to be executed. End sql code with a semicolon (;)
+                                                }""")
                     continue
                 if "CANNOT_SOLVE" in sql:
                     return "Query cannot be solved with given data."
@@ -188,46 +201,46 @@ class SQLGenerator(BaseTool):
             rows = result.fetchall()
         df = pd.DataFrame(rows)
 
-        df.to_csv('database_info.csv', index=False)
-
         description = "Database Schema Description:\n\n"
         
         # Group by schema and table to create structured descriptions
         for (schema, table), group in df.groupby(['schema_name', 'table_name']):
+            if table in ['table_name', 'spatial_ref_sys', 'raster_overviews', 'raster_columns', 'geometry_columns', 'geography_columns']:
+                continue
             description += f"Schema: {schema}\n"
             description += f"Table: {table}\n"
             description += "Columns:\n"
             
             with self.session() as session:
                 # Fetch a few example values for each column in the table
-                sample_query = f"SELECT * FROM {schema}.{table} LIMIT 5"
+                sample_query = f"SELECT * FROM {schema}.{table} LIMIT 10"
                 sample_result = session.execute(text(sample_query))
                 sample_data = pd.DataFrame(sample_result.fetchall(), columns=sample_result.keys())
             
             for _, row in group.iterrows():
                 column_desc = f"  - Column: {row['column_name']}, Type: {row['data_type']}"
-                if row['is_nullable'] == 'YES':
-                    column_desc += " (Nullable)"
-                if pd.notna(row['max_length']):
-                    column_desc += f", Max Length: {row['max_length']}"
-                if pd.notna(row['numeric_precision']):
-                    column_desc += f", Precision: {row['numeric_precision']}"
-                if pd.notna(row['numeric_scale']):
-                    column_desc += f", Scale: {row['numeric_scale']}"
+                # if row['is_nullable'] == 'YES':
+                #     column_desc += " (Nullable)"
+                # if pd.notna(row['max_length']):
+                #     column_desc += f", Max Length: {row['max_length']}"
+                # if pd.notna(row['numeric_precision']):
+                #     column_desc += f", Precision: {row['numeric_precision']}"
+                # if pd.notna(row['numeric_scale']):
+                #     column_desc += f", Scale: {row['numeric_scale']}"
                 
                 # Add example values if available
                 if row['column_name'] in sample_data.columns:
                     if row['column_name'] == 'geom' or not any([ch in row['data_type'] for ch in ['character', 'numeric']]) or row['column_name'] == 'srtext':
                         continue
                     example_values = sample_data[row['column_name']].dropna().unique()
-                    example_values_str = ', '.join(map(str, example_values[:3]))  # Take first 3 unique examples
+                    example_values_str = ', '.join(map(str, example_values[:7]))  # Take first 3 unique examples
                     if example_values_str:
                         column_desc += f", Examples: {example_values_str}"
                 
                 description += column_desc + "\n"
             
             description += "\n"
-        print(description)
+        # print(description)
         return description
 
 

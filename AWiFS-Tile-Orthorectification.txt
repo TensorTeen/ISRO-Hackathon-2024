@@ -1,0 +1,44 @@
+--- Page 1 ---
+AWIFS ORTHO RECTIFIED TILES
+National Remote Sensing Centre
+
+--- Page 2 ---
+Introduction
+This document briefly describes Resourcesat-1 &
+AWiFS sensor, Orthorectified tiles covering Indian
+region, generation methodology and its accuracies.
+Tiles Specification
+Tile related
+· Tile Size
+: 1 deg x 1deg
+· Collar
+: 20 pixels
+· Naming Convention
+: As per SOI OSM
+Projection related
+· Projection
+: Geographic Lat/Long
+· Datum
+: WGS-84
+· Resolution
+: 0.000450 (~50m).
+Image Related
+· Image File Format
+: GeoTIFF
+· Number of Bands
+: 4 (BAND 2, 3, 4, 5)
+· Radiometric
+: 10 bits
+Resolution
+(Packed as 16bit)
+· Correction level
+: Orthorectified
+Naming Convention
+Image File naming convention contains the following
+information
+o Sensor
+o SOI OSM 1deg x 1deg area
+o Path & Row
+o Date of Acquisition
+o Band Information
+

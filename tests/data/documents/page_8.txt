@@ -1,0 +1,36 @@
+--- Page 1 ---
+NRSC/ISRO
+Ver.1
+5.5. Barren Rocky/Stony Waste: These are rock exposures of varying lithology often barren and
+devoid of soil and vegetation cover.
+5.6 Rann Area: An extensive salt marsh of western India between the Gulf of Kutch and the
+Indus River delta.
+6.0 WETLAND / WATER BODIES
+All submerged or water-saturated lands, natural or man-made, inland or coastal, permanent or
+temporary, static or dynamic, vegetated or non-vegetated, which necessarily have a land-water
+interface, are defined as wetlands. It consists of:
+6.1 Inland Wetlands: These are the areas that include ox-bow lakes, cut-off meanders, playas,
+marsh, etc. which are seasonal as well as permanent in nature. It also includes manmade
+wetlands like waterlogged areas (seasonal and perennial).
+6.2 Coastal Wetland: These include estuaries, lagoons, creek, backwater, bay, tidal flat/mud
+flat, sand/beach, rocky coast, mangrove, salt marsh/marsh vegetation and other hydrophytic
+vegetation and saltpans.
+6.3 River /Stream / Canals: Rivers/streams are natural course of water flowing on the land surface
+along a definite channel/slope regularly or intermittently towards a sea in most cases or in to a
+lake or an inland basin in desert areas or a marsh or another river. Canals are artificial water course
+constructed for irrigation, navigation or to drain out excess water from agricultural lands.
+6.4 Water Bodies: This category comprises areas with surface water in the form of ponds, lakes,
+tanks and reservoirs.
+7.0 SNOW AND GLACIERS
+These are the areas under snow cover confined to the Himalayan region. They are mostly
+located in mountain peaks and steep slopes/high relief areas. These are the areas which remain
+under snow either on temporary or permanent basis. These are the areas under perpetual
+snow cover throughout the year. They are the origins of most of Himalayan river systems.
+METHODOLOGY
+On-screen visual interpretation was used in the current exercise wherein the GIS LULC vector layer
+created during the first cycle was overlaid on to the terrain corrected Resourcesat 2 LISS III imagery
+acquired during 2015-16. The methodology essentially is based on editing the above vector layer for
+the changed areas thereby creating the new LULC vector layer
+for 2015-16.
+7
+

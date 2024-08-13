@@ -1,0 +1,71 @@
+--- Page 1 ---
+Document Number
+NRSC-RSAA-ERG-G&GD-SEP' 12-TR-445
+Title
+MANUAL FOR GEOMORPHOLOGY AND LINEAMENT
+MAPPING (WEB VERSION)
+Type of Document
+Technical Report
+Number of pages
+28
+Author(s)
+Geosciences Division
+Reviewed by
+Head, Geosciences Division
+Approved by
+DD (RSAA), NRSC
+Abstract
+This manual highlights the use of satellite remote sensing techniques
+for geomorphological and lineament mapping. A three level
+classification system based on the origin of landforms was used in
+creating geomorphology and lineament database on 1:50,000 scale. A
+total of 417 landforms under 11 genetic classes were mapped in this
+project. This manual (web version) also addresses uniform
+geodatabase standard to be followed during the mapping stage. A
+detailed description of the landforms is also provided in the project
+manual.
+Controlled by
+Head, Geosciences Division
+Distribution
+Unrestricted
+Reproduction Rights
+This report and its contents are the property of National Remote
+Sensing Centre
+Document Control Sheet
+1 | Page
+PDF Creator - PDF4Free v3.0
+http://www.pdf4free.com
+
+--- Page 2 ---
+National geomorphological and lineament mapping on 1:50,000 scale
+using Resourcesat-1 LISS-III data
+(ISRO - GSI collaboration under Standing Committee on Geology)
+INTRODUCTION
+Geomorphology is defined as scientific study of landforms. Geo means 'earth',
+Morpho means 'form' and Logy means 'discourse' or 'science'. It is a branch of
+Earth Science, which has grown after the advent of Aerial photographs and satellite
+data. Geomorphology, along with information on soil, water and vegetation has become
+one of the essential inputs in planning for various developmental activities. The scope of
+geomorphology has further expanded with the landform maps widely used in various
+fields of resource surveys, environmental analysis, hydrological studies, engineering
+applications and geo-technical studies. As a result, experts in various fields such as
+geoscience, pedology, hydrology, civil engineering, urban planning etc. have started
+intuitively using landform maps for various applications in their respective fields. But
+classification schemes of landforms used for resource surveys and other research
+applications are derived based on the requirement of the specific activity for which it
+would be used without giving much emphasis on the genesis of the landforms. Though,
+Geological Survey of India (GSI) has prepared the geomorphological map on
+1:2,000,000 scale, it is desirable to map the landform of the country on 1:50,000 scale
+due to demands from various user communities.
+Similarly, the significance of structural lineaments, which reveal the hidden architecture
+of rock basement has been recognised only recently with the advancement in geologic
+remote sensing. Lineament studies have found applications in various fields of earth
+science such as global tectonic studies, delineation of litho-contacts and tectonic units,
+analysis of deformation pattern, ground water and oil exploration, geo-technical and
+geo-engineering applications and seismo-tectonic studies. Though, small-scale
+lineament maps are available, their utility is limited to regional scale tectonic studies.
+Also, with the advancement in digital image processing techniques, the satellite data in
+2 | Page
+PDF Creator - PDF4Free v3.0
+http://www.pdf4free.com
+

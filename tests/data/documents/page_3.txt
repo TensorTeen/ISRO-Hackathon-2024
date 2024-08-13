@@ -1,0 +1,66 @@
+--- Page 1 ---
+NRSC/ISRO
+Ver.1
+NATURAL RESOURCE CENSUS LAND USE LAND COVER DATABASE FOR
+DISSEMINATION THROUGH BHUVAN
+INTRODUCTION
+Earth observations from space platforms play a crucial role in generation and dissemination of
+information on LULC pattern in a timely and reliable manner providing vital inputs required for
+optimal land use planning. The evolution of Indian remote sensing program over the past two
+decades, providing a variety of remote sensing- based solutions for national development, is an apt
+and timely national initiative. Some of the important projects of ISRO/DOS under the theme of
+LULC are given in the Table - 1.
+Table - 1: Major Land Use Land Cover Mapping Projects carried out by ISRO / DOS
+S.NO.
+PROJECT NAME
+1
+Nationwide Wasteland Mapping
+1985, 1986 - 1999, 2003, 2005-06,
+2008-09, 2015-16
+2
+Land Use Land Cover Mapping for Planning based
+on Agro-Climatic Zone
+1989 - 1990
+3
+Nationwide Wetland Mapping
+1995
+4
+Urban Sprawl of Million Plus Cities
+1988 - 1990
+5
+Land Use Land Cover Database for Zoning Atlas
+for siting of Industries
+From 1990 onwards at different
+times
+6
+Urban Information Systems (BMR; NCR; MMDA;
+AUDA, HUDA,NCRPB etc.
+7
+Land Use Land Cover Mapping using AWiFS data
+2004 onwards at one year of interval
+8
+Integrated Mission for Sustainable Development
+1992-1998
+YEAR
+1999
+9
+Integrated Resource Information for Desert
+Areas
+2002
+10
+Land Use/Land Cover Mapping on 1 : 50,000 scale
+2005-06, 2011-12
+A project on National Land Use/ Land Cover Mapping on 1:50,000 scale (Second Cycle) using multi-
+temporal Resourcesat-2 terrain corrected Linear Imaging Self Scanning Sensor (LISS) -III data was
+taken up by DOS, under Natural Resources Census (NRC) Project of National Natural Resources
+Repository (NRR) Program. The project has been accomplished with the active participation of
+various state, central, universities and others partner institutes. The land use/land cover classification
+scheme of 1:50,000 scale consists of Level-I: 8 classes, Level-II: 31 classes and Level-III:
+54 classes (NRSC, 2012). This classification was finalized after elaborate discussions within the DOS
+and various Central/State government departments/institutions. The project had been completed
+and atlas (NRSC, 2011) was released for the use of various departments central, state and others.
+LULC data is regrouped for web users with an emphasis on land cover classes as given in Table - 2.
+This has been undertaken keeping in view of volume of data, faster access to database and
+visualization.
+2
+

@@ -27,8 +27,8 @@ img = asyncio.run(tool.run(input_image=img, input_prompt=prompt)).image
 # ^Alternative, but unnecessary way to run
 t3 = time.time()
 
-img.show()
-img.save('test_image_segment.png')
+img.image.show()
+img.image.save('test_image_segment.png')
 print(f'Data Loading Time: {t1 - t0}')
 print(f'Model Initialisation: {t2 - t1}')
 print(f'Running time: {t3 - t2}')

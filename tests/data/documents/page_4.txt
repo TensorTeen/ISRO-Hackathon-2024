@@ -1,0 +1,74 @@
+--- Page 1 ---
+NRSC/ISRO
+Ver.1
+Table - 2: Grouping of LULC classes of 3rd cycle
+Sl.
+1
+2
+3
+4
+5
+Description-1
+Builtup
+Agriculture
+Forest
+Grass/ Grazing
+Grass/ Grazing
+Description-2
+Urban
+Rural
+Mining
+Mining - Active, Mining - Abandoned, Quarry
+Crop land
+Kharif, Rabi, Zaid, Cropped in 2 seasons, Cropped in more than 2 seasons
+Plantation
+Agriculture Plantation
+Fallow
+Fallow land
+Current Shifting cultivation
+Shifting cultivation - Current
+Evergreen / Semi evergreen
+Dense / Closed and Open category of Evergreen / Semi evergreen
+Deciduous
+Dense / Closed and Open category of Deciduous and Tree Clad Area
+Forest Plantation
+Forest Plantation
+Scrub Forest
+Scrub Forest, Shifting Cultivation - Abandoned
+Swamp / Mangroves
+Dense / Closed & Open Mangrove
+Barren/unculturable/Wastela
+Salt Affected Land
+6
+7
+Wetlands / Water Bodies
+Inland Wetland
+Wetland - Inland Natural (Ox-bow lake, cut off meander, waterlogged
+etc.), Inland Manmade (Water logged, saltpans etc.)
+Wetland - Lagoon, creeks, mudflats, Saltpan etc.
+Gullied / Ravinous Land
+Scrub land
+Sandy area
+Desertic, Coastal, Riverine sandy area
+Barren rocky
+Rann
+Coastal Wetland
+River / Stream / canals
+Water bodies
+Snow
+Classes from NRC LULC50K Mapping Project
+Built up - Compact (Continuous), Built up - Sparse (Discontinuous), Built
+up - Vegetated / Open area, Industrial area, Ash / Cooling Pond / effluent
+and other waste
+Rural
+Grassland: Alpine / Sub-Alpine, Temperate / Sub Tropical, Tropical /
+Desertic
+Salt Affected Land
+Gullied, Ravinous
+Dense / Closed and Open category of scrub land
+Barren rocky
+Rann
+Perennial & Non-Perennial River, Canal / Drain
+Aquaculture, Permanent & seasonal Lake/Ponds, Reservoir/Tanks
+Snow
+

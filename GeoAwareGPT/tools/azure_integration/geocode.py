@@ -26,7 +26,7 @@ class GeoCode(BaseTool):
     def run(self, address):
         credential = AzureKeyCredential(os.environ["AZURE_SUBSCRIPTION_KEY"])
         # Create a search client
-        search_client = azsearch.MapsSearchClient(credential)
+        search_client = azsearch.MapsSearchClient(credential=credential)
 
         # Perform a search
         results = search_client.fuzzy_search(query=address)
@@ -38,4 +38,3 @@ class GeoCode(BaseTool):
 
         # Return the location
         return result.position
-

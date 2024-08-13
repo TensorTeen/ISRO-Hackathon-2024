@@ -1,0 +1,42 @@
+--- Page 1 ---
+NRSC/ISRO
+Ver. 1
+DESCRIPTION OF LAND USE AND LAND COVER CLASSES
+LULC classification scheme and brief description of classes are as given hereunder:
+Land Cover is defined as observed physical features on the Earth's Surface. When an economic
+function is added to it, it becomes Land Use. (FAO, 2005).
+1.0 BUILT-UP LAND
+It is an area of human habitation developed due to non-agricultural use and that has a cover of
+buildings, transport and communication, utilities in association with water, vegetation and vacant
+lands. Web LULC map consists of 3 classes under built-up viz., urban, rural and mining.
+1.1 Urban: Urban areas are non-linear built up areas covered by impervious structures
+adjacent to or connected by streets. This cover is related to centers of population. This
+class usually occurs in combination with, vegetated areas that are connected to buildings that
+show a regular pattern, such as vegetated areas, gardens etc. and industrial and/or other areas.
+(FAO, 2005).It includes residential areas, mixed built-up, recreational places, public / semi-public
+utilities, communications, public utilizes/facility, commercial
+areas, reclaimed
+areas,
+vegetated areas, transportation, industrial areas and their dumps, and ash/cooling ponds.
+1.2 Rural: These are the lands used for human settlement of size comparatively less than the
+urban settlements of which the majority of population is involved in the primary activity of
+agriculture. These are the built-up areas, smaller in size, mainly associated with agriculture and
+allied sectors and non-commercial activities. They can be seen in clusters non- contiguous or
+scattered.
+1.3 Mining: Mining areas encompass area under surface mining operations. The recognizable
+impacts of these activities on the landscape are unmistakable giant pit mines covering vast
+areas. The presence of water bodies does not necessarily imply inactive or unused extractive
+areas; ponds or lakes are often an integral part of an extractive operation. (USGS, 1999) It includes
+surface rocks and stone quarries, sand and gravel pits, brick kilns, etc. These are areas of stockpile
+of storage dump of industrial raw material or slag/effluents or waste material or quarried/mixed
+debris from earth's surface.
+2.0 AGRICULTURAL LAND
+These are the lands primarily used for farming and for production of food, fiber, and other
+commercial and horticultural crops. It consists of:
+2.1 Cropland: These are the areas with standing crop as on the date of Satellite
+overpass. Cropped areas appear in bright red to red in color with varying shape and size in a
+contiguous to non- contiguous pattern. They are widely distributed indifferent terrains;
+prominently appear in the irrigated areas irrespective of the source of irrigation. It includes
+kharif, rabi and zaid crop lands along with areas under double or triple crops.
+4
+
