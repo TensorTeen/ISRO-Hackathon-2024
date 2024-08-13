@@ -45,11 +45,7 @@ class SearchPOI(BaseTool):
             coordinates=(latitude, longitude), query=query.upper()
         )
         if not results.results:
-<<<<<<< Updated upstream
-            return []
-=======
             return {"tool_results": "No results found"}
->>>>>>> Stashed changes
 
         # Get the first result
         result = [
