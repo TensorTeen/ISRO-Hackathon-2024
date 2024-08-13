@@ -29,7 +29,7 @@ class GeoCode(BaseTool):
         search_client = azsearch.MapsSearchClient(credential)
 
         # Perform a search
-        results = search_client.search_address(query=address)
+        results = search_client.fuzzy_search(query=address)
         if not results.results:
             raise ValueError("No results found")
 

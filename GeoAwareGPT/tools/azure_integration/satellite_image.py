@@ -11,7 +11,7 @@ import asyncio
 from azure.core.credentials import AzureKeyCredential
 from azure.core.exceptions import HttpResponseError
 from azure.maps.render import MapsRenderClient
-from azure.maps.render.models import MapTileSize
+# from azure.maps.render.models import MapTileSize
 
 from ...schema import AzureTool, ToolImageOutput
 

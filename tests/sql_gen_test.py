@@ -1,4 +1,4 @@
-from GeoAwareGPT.tools.database_integration import SQLGenerator
+from GeoAwareGPT.tools.database_integration.sql_bot import SQLGenerator
 import asyncio
 
 test_gen = SQLGenerator()
