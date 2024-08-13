@@ -72,7 +72,7 @@ class Agent:
         self.messages.assistant_message(message)
 
     async def get_assistant_response(self):
-        print(self.messages.chat)
+        # print(self.messages.chat)
         response = await self.model.generate(self.messages)
         if response and response.choices:
             answer = response.choices[0].message.content
@@ -85,13 +85,14 @@ class Agent:
         self.tools.append(tool)
 
     async def agent_loop(self):
-        print(self.messages.chat)
+        # print(self.messages.chat)
         response = await self.get_assistant_response()
         try:
             response = json.loads(response)
-            print(response)
+            # print(response)
         except:
-            print(response)
+            # print(response)
+            pass
         tool_calls = response["tool_calls"]
         if not tool_calls:
             return {}, {}, False, response["audio"]
@@ -107,6 +108,6 @@ class Agent:
                 tool_results_text[i] = "Image shown to user"
             else:
                 tool_results_text[i] = str(tool_results[i])
-            print(f"{i}: {tool_results_text[i]}")
+            # print(f"{i}: {tool_results_text[i]}")
         self.add_user_message(str({"tool_results": json.dumps(tool_results_text)}))
         return tool_results_display, tool_results_text, AUA, response["audio"]
