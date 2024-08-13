@@ -6,8 +6,6 @@ from typing import cast, Optional
 import io
 
 import streamlit as st
-from streamlit_float import float_init
-from file_chat_input import file_chat_input
 import litellm
 
 from GeoAwareGPT import Agent, GeminiModel, GeminiModelConfig, ToolHandler
