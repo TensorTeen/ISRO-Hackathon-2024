@@ -58,6 +58,34 @@ class ModelConfig:
         """Returns a string representation of the model configuration."""
         return f"{self.name} - {self.description} - {self.version} - {self.args}"  # noqa # type: ignore
 
+class AzureModelConfig(ModelConfig):
+    """A class representing the configuration of the Gemini model.
+
+    Attributes:
+        model_name (str): The name of the Azure model.
+        description (str): The description of the Azure model.
+
+    Methods:
+        __init__(): Initializes the Gemini model configuration.
+    """
+
+    def __init__(
+        self,
+        model_name: str = "azure/geoawaregptfouro",
+        description: str = "GPT-4o Mini",
+        response_format: str | None = None,
+    ):
+        super().__init__(
+            model_name,
+            description,
+        )
+        self.response_format = response_format
+
+    def __dict__(self):
+        return {
+            "model": self.model_name,
+            "response_format": self.response_format,
+        }
 
 class GeminiModelConfig(ModelConfig):
     """A class representing the configuration of the Gemini model.
