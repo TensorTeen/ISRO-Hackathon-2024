@@ -9,7 +9,9 @@ import io
 import asyncio
 
 from azure.core.credentials import AzureKeyCredential
+from azure.core.exceptions import HttpResponseError
 from azure.maps.render import MapsRenderClient
+from azure.maps.render.models import MapTileSize
 
 from ...schema import AzureTool, ToolImageOutput
 
@@ -88,7 +90,7 @@ class SatelliteImage(AzureTool):
                 "zoom": "The zoom level of the image. The default value is 14(enum[1-19])",
             },
         )
-        self.tool_type = "AU"
+        self.tool_type = "AUA"
         self.tool_output = ToolImageOutput
         self.credential = AzureKeyCredential(os.environ["AZURE_SUBSCRIPTION_KEY"])
         self.render_client = MapsRenderClient(
@@ -98,7 +100,7 @@ class SatelliteImage(AzureTool):
         # self.ska = os.environ['AZURE_SUBSCRIPTION_KEY']
         # print(f'{self.ska=}')
 
-    async def run(self, latitude: float, longitude: float, zoom: int) -> Image.Image:
+    async def run(self, latitude: float, longitude: float, zoom: int) -> ToolImageOutput:
         """
         Get satellite image from latitude, longitude
 
@@ -107,13 +109,17 @@ class SatelliteImage(AzureTool):
         """
         x, y = lat_long_to_tile_xy(latitude, longitude, zoom)
         get_tile = make_async(MapsRenderClient.get_map_tile)
-        result: Iterator[bytes] = await get_tile(
-            self.render_client,
-            tileset_id="microsoft.imagery",
-            x=x,
-            y=y,
-            z=zoom,
-        )
+        try:
+            result: Iterator[bytes] = await get_tile(
+                self.render_client,
+                tileset_id="microsoft.imagery",
+                x=x,
+                y=y,
+                z=zoom,
+                # // tile_size=MapTileSize.SIZE512, # ! Highly inconsistent
+            )
+        except HttpResponseError as e:
+            raise e
 
         @make_async
         def load_image(result: Iterator[bytes]) -> Image.Image:
@@ -133,7 +139,7 @@ class SatelliteImage(AzureTool):
 async def main():
     # python -m GeoAwareGPT.tools.azure_integration.satellite_image
     tool = SatelliteImage()
-    img = await tool.run(13.08784, 80.27847, 4)
+    img = (await tool.run(13.08784, 80.27847, 4)).image
     img.save("test_satellite_img.png")
     img.show()
 

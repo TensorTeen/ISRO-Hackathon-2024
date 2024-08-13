@@ -7,7 +7,7 @@ from .schema import (
     BaseState,
     ToolImageOutput
 )
-from .azure_schema import AzureTool, AzureEndpointContextManager
+from .azure_schema import AzureTool
 __all__ = [
     "ModelConfig",
     "GeminiModelConfig",
@@ -16,5 +16,5 @@ __all__ = [
     "ChatBuilder",
     "BaseState",
     "AzureTool",
-    "AzureEndpointContextManager",
+    "ToolImageOutput"
 ]

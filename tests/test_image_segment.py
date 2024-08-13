@@ -1,5 +1,6 @@
 """Sample file for image segmentation tool"""
-import GeoAwareGPT.schema
+import GeoAwareGPT
+quit()
 import GeoAwareGPT.tools
 import GeoAwareGPT.tools.image_segment
 from PIL import Image
@@ -19,7 +20,7 @@ t1 = time.time()
 # Running model
 tool: GeoAwareGPT.schema.BaseTool = SegmentationTool()
 t2 = time.time()
-img = asyncio.run(tool.run(input_image=img, input_prompt=prompt))
+img = asyncio.run(tool.run(input_image=img, input_prompt=prompt)).image
 # Results in an error due to matplotlib being called with the wrong backend, 
 # but doesn't cause any issues
 # img = GeoAwareGPT.tools.image_segment.segment.segment_image_with_prompt(img, prompt)

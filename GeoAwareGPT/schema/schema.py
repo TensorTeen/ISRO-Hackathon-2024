@@ -19,7 +19,7 @@ class BaseTool:
     """
 
     def __init__(
-        self, name: str, description: str, version: str, args: Optional[dict] = None
+        self, name: str, description: str, version: str, args: Optional[dict] = None,
     ):
         self.name: str = name
         self.description = description
@@ -197,11 +197,7 @@ class ToolImageOutput:
     """A class representing the output of a tool with an image.
 
     Attributes:
-        image_url (str): The URL of the image output.
-        args (dict): The arguments for the tool.
-
-    Methods:
-        __str__(): Returns a string representation of the tool image output.
+        image (PIL.Image.Image): Pointer to PIL Image.
     """
 
     def __init__(self, image: Image.Image):

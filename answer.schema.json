@@ -1,0 +1,15 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "args": {
+        "type":"object"
+      }
+    },
+    "required": ["name", "args"]
+  }
+}
