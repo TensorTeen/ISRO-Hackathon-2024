@@ -18,7 +18,7 @@ class Weather(BaseTool):
         }  # argument: description(type)
         super().__init__(
             "get_weather",
-            "A tool to get the current weather given lattitude Longitude. Weather for the previous day can also be obtained using the days parameter. Severe weather alerts can also be obtained using the severe_alerts parameter",
+            "A tool to get the current weather given latitude Longitude. Weather for the previous day can also be obtained using the days parameter. Severe weather alerts can also be obtained using the severe_alerts parameter",
             "1.0",
             self.args,
         )
