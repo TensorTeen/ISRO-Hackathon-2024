@@ -5,6 +5,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, session
 from GeoAwareGPT import Agent, GeminiModel, GeminiModelConfig, AzureModel, AzureModelConfig
 from GeoAwareGPT.schema import BaseTool, BaseState
+import re
 import sys
 import asyncio
 import json
@@ -59,7 +60,7 @@ PostGIS extends PostgreSQL to support geographic objects. Here are some of the k
 
 These functions can be used to perform complex geospatial analyses and queries, enhancing the capabilities of your database with spatial data.
 
-Given below are table names and their corresponding column names with example values. You are to only use the column and table names mentioned below. While doing string comparisons convert both sides to lower case. ENSURE THAT TABLE NAMES AND FIELD NAMES ARE VALID. Return 'CANNOT_SOLVE' in the sql_query in case the query is not solvable with the given database, only if you are confident that it cannot be solved. Do not complicate the queries.
+Given below are table names and their corresponding column names with example values. You are to only use the column and table names mentioned below. While doing string comparisons convert both sides to lower case. ENSURE THAT TABLE NAMES AND FIELD NAMES ARE VALID. Return 'CANNOT_SOLVE' in the sql_query in case the query is not solvable with the given database, only if you are confident that it cannot be solved. Make sure to add a where clause to ensure that you're not returning NULL values, eg. WHERE name IS NOT NULL. Do not complicate the query.
 """
 
 
@@ -77,10 +78,10 @@ class SQLGenerator(BaseTool):
             session (sqlalchemy.orm.sessionmaker): SQLAlchemy session
         """
         name = 'SQLGenerator'
-        description = """Generates and executes SQL queries on a POSTGIS database containing the following tables: city boundaries, land use, aadhaar enrolment centres, waterways, natural, points, places, buildings
+        description = """Generates and executes SQL queries on a POSTGIS database containing the following tables: city boundaries, land use, aadhaar enrolment centres, waterways, natural, points, places, buildings. This requires geocoded data (latitude and longitude) for queries involving other places.
         """
         args = {
-            "instructions": "Give detailed instructions on what the query should accomplish. The SQL generator will be given the database schema and the natural language instructions that you provide."
+            "instructions": "Give detailed instructions on what the query should accomplish. The SQL generator will be given the database schema and the natural language instructions. ENSURE THAT COORDINATES ARE INCLUDED IN THE INSTRUCTIONS FOR ANY PLACE."
         }
         version = '0.1'
         super().__init__(name, description, version, args)
@@ -145,11 +146,15 @@ class SQLGenerator(BaseTool):
                     return None
                 count+=1
                 response = await self.agent.get_assistant_response()
+                pattern = '```json(.*?)```'
+                matches = re.findall(pattern, response, re.DOTALL)
+                json_string = matches[-1].strip() if matches else response
                 try:
-                    response = json.loads(response)
+                    response = json.loads(json_string)
                     sql = response['sql_query']
                 except:
                     print("Invalid JSON!!!")
+                    print(response)
                     self.agent.add_user_message("""ERROR: Invalid JSON. Please enter a valid JSON following the instructions provided, in the same JSON format. {
                                                     "thought": "...",  # Thought process of the bot to decide what content to reply with, which tool(s) to call, briefly describing reason for tool arguments as well
                                                     "sql_query": "..."  # SQL query to be executed. End sql code with a semicolon (;)
@@ -214,18 +219,18 @@ class SQLGenerator(BaseTool):
             
             for _, row in group.iterrows():
                 column_desc = f"  - Column: {row['column_name']}, Type: {row['data_type']}"
-                if row['is_nullable'] == 'YES':
-                    column_desc += " (Nullable)"
-                if pd.notna(row['max_length']):
-                    column_desc += f", Max Length: {row['max_length']}"
-                if pd.notna(row['numeric_precision']):
-                    column_desc += f", Precision: {row['numeric_precision']}"
-                if pd.notna(row['numeric_scale']):
-                    column_desc += f", Scale: {row['numeric_scale']}"
+                # if row['is_nullable'] == 'YES':
+                #     column_desc += " (Nullable)"
+                # if pd.notna(row['max_length']):
+                #     column_desc += f", Max Length: {row['max_length']}"
+                # if pd.notna(row['numeric_precision']):
+                #     column_desc += f", Precision: {row['numeric_precision']}"
+                # if pd.notna(row['numeric_scale']):
+                #     column_desc += f", Scale: {row['numeric_scale']}"
                 
                 # Add example values if available
                 if row['column_name'] in sample_data.columns:
-                    if row['column_name'] == 'geom' or not any([ch in row['data_type'] for ch in ['character']]) or row['column_name'] == 'srtext':
+                    if row['column_name'] == 'geom' or not any([ch in row['data_type'] for ch in ['character', 'numeric']]) or row['column_name'] == 'srtext':
                         continue
                     example_values = sample_data[row['column_name']].dropna().unique()
                     example_values_str = ', '.join(map(str, example_values[:7]))  # Take first 3 unique examples

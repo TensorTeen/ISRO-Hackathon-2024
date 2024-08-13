@@ -44,7 +44,7 @@ class SearchPOI(BaseTool):
             coordinates=(latitude, longitude), query=query.upper()
         )
         if not results.results:
-            raise ValueError("No results found")
+            return []
 
         # Get the first result
         result = [
