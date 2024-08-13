@@ -17,4 +17,5 @@ __all__ = [
     "BaseState",
     "AzureTool",
     "AzureEndpointContextManager",
+    "ToolImageOutput"
 ]

@@ -1,18 +1,31 @@
-from typing import List, Dict
+from typing import List, Dict, Sequence
 from asyncio import iscoroutinefunction
+import warnings
+import re
 
-from .schema import BaseTool
+from .schema import BaseTool, ToolImageOutput
 
 DEBUG = True
 class ToolHandler:
     def __init__(self, tools: List[BaseTool]):
-        self.tools = tools
         self.tools: Dict[str, BaseTool] = {tool.name: tool for tool in tools}
+    
+    def add_tool(self, tool: BaseTool|Sequence[BaseTool]):
+        def validate(tool: BaseTool):
+            if not isinstance(tool, BaseTool):
+                raise TypeError('Tool should inherit from base tool')
+            if tool.name in self.tools:
+                warnings.warn('Tool already exists. Overwriting.', category=RuntimeWarning)
+            return tool
+        if isinstance(tool, BaseTool):
+            self.tools[tool.name] = validate(tool)
+        else:
+            self.tools.update({_tool.name: validate(_tool) for _tool in tool})
 
     async def call_tool(self, tool_name, args):
         return self.tools[tool_name].run(**args) if not iscoroutinefunction(self.tools[tool_name].run) else await self.tools[tool_name].run(**args)
 
-    async def handle_tool(self, llm_output):
+    async def handle_tool(self, llm_output: List):
         tool_results = {}
         for i in range(len(llm_output)):
             tool_name = llm_output[i]["name"]
@@ -27,10 +40,10 @@ class ToolHandler:
                     print(llm_output)
                     raise e
 
-            if self.tools[tool_name].tool_output == "image":
+            # if isinstance(tool_output, ToolImageOutput):
                 
-                # tool_results['image'].append(tool_output)
-                ...
+            #     # tool_results['image'].append(tool_output)
+            #     ...
             tool_results[tool_name] = tool_output
         return tool_results
 # class ToolImageOutput:
