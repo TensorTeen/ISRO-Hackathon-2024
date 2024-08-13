@@ -1,6 +1,7 @@
 from .schema import (
     ModelConfig,
     GeminiModelConfig,
+    AzureModelConfig,
     BaseTool,
     QueryInput,
     ChatBuilder,

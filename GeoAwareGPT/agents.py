@@ -9,7 +9,7 @@ import re
 from litellm import acompletion
 from dotenv import load_dotenv
 
-from .schema import GeminiModelConfig, ChatBuilder, BaseTool, BaseState
+from .schema import GeminiModelConfig, AzureModelConfig, ChatBuilder, BaseTool, BaseState
 from .ToolHandler import ToolHandler
 from GeoAwareGPT.schema.schema import ToolImageOutput
 
@@ -24,6 +24,37 @@ class Model:
         "This method should be implemented by all child classes for prompt generation"
         raise NotImplementedError(
             "This method is meant to be implemented by child classes"
+        )
+
+
+class AzureModel(Model):
+    def __init__(self, model_config: AzureModelConfig = AzureModelConfig()):
+        self.model_config = model_config
+        self.input_params = model_config.__dict__()
+        self.check_api_key()
+
+    def check_api_key(self):
+        """Check if the API key is available in the environment."""
+        api_key = os.environ.get("AZURE_OPENAI_API_KEY")
+        api_base = os.environ.get("AZURE_OPENAI_ENDPOINT")
+        api_version = os.environ.get("AZURE_API_VERSION")
+        self.input_params['api_key'] = api_key
+        self.input_params["api_base"] = api_base
+        self.input_params['api_version'] = api_version
+        if not api_key:
+            print(
+                "Please set the OPENAI_API_KEY environment variable with the API key."
+            )
+            sys.exit(1)
+
+    async def generate(
+        self,
+        messages: ChatBuilder,
+    ):
+        """Generate a response for the given messages."""
+        return await acompletion(
+            messages=messages.chat,
+            **self.input_params,
         )
 
 
