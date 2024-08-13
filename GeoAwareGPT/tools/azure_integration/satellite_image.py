@@ -9,18 +9,17 @@ import io
 import asyncio
 
 from azure.core.credentials import AzureKeyCredential
-from azure.identity import DefaultAzureCredential
 from azure.maps.render import MapsRenderClient
 
-from ...schema import AzureTool
+from ...schema import AzureTool, ToolImageOutput
 
 
 # def authenticate(mode=os.getenv("AZURE_AUTH_MODE", "SKA")):
 #     """
-#     Authenticates the user with Azure. If the mode is set to "SKA", 
+#     Authenticates the user with Azure. If the mode is set to "SKA",
 #         uses shared key authentication. Otherwise, uses microsoft entra (I think)
 #     Args:
-#         mode (str, optional): The mode of authentication ('SKA' or 'Entra'). Defaults to 
+#         mode (str, optional): The mode of authentication ('SKA' or 'Entra'). Defaults to
 #             os.getenv("AZURE_AUTH_MODE", "SKA").
 #     """
 #     from dotenv import load_dotenv
@@ -35,13 +34,18 @@ def make_async(func: Callable) -> Callable:
     async def wrapper(*args, **kwargs):
         result = await asyncio.to_thread(func, *args, **kwargs)
         return result
+
     return wrapper
+
+
 def fake_make_async(func: Callable) -> Callable:
     @wraps(func)
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
         return result
+
     return wrapper
+
 
 def lat_long_to_tile_xy(latitude, longitude, zoom):
     # Ensure latitude and longitude are within bounds
@@ -75,19 +79,25 @@ class SatelliteImage(AzureTool):
         """Note: this authenticates with SKA"""
         super().__init__(
             config=config,
-            name="satellite_image",
+            name="get_satellite_image",
             description="A tool to get satellite images from latitude, longitude and zoom level",
-            version="0.1",
+            version="1",
+            args={
+                "latitude": "The latitude of the location(float)",
+                "longitude": "The longitude of the location(float)",
+                "zoom": "The zoom level of the image. The default value is 14(enum[1-19])",
+            },
         )
         self.tool_type = "AU"
-        self.tool_output = "image"
-        self.credential = AzureKeyCredential(os.environ['AZURE_SUBSCRIPTION_KEY'])
+        self.tool_output = ToolImageOutput
+        self.credential = AzureKeyCredential(os.environ["AZURE_SUBSCRIPTION_KEY"])
         self.render_client = MapsRenderClient(
             credential=self.credential,
             # client_id=os.environ['AZURE_CLIENT_ID'],
         )
         # self.ska = os.environ['AZURE_SUBSCRIPTION_KEY']
         # print(f'{self.ska=}')
+
     async def run(self, latitude: float, longitude: float, zoom: int) -> Image.Image:
         """
         Get satellite image from latitude, longitude
@@ -104,6 +114,7 @@ class SatelliteImage(AzureTool):
             y=y,
             z=zoom,
         )
+
         @make_async
         def load_image(result: Iterator[bytes]) -> Image.Image:
             img_file = io.BytesIO()
@@ -115,12 +126,17 @@ class SatelliteImage(AzureTool):
             except OSError as e:
                 raise ValueError(f"Could not load image") from e
             return img
-        return await load_image(result)
+
+        return ToolImageOutput(image=await load_image(result))
+
+
 async def main():
     # python -m GeoAwareGPT.tools.azure_integration.satellite_image
     tool = SatelliteImage()
     img = await tool.run(13.08784, 80.27847, 4)
     img.save("test_satellite_img.png")
     img.show()
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     asyncio.run(main())

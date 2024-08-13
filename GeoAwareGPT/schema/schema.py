@@ -1,5 +1,7 @@
 from typing import List, Optional
 import os
+from PIL import Image
+
 
 class BaseTool:
     """A base class representing a tool.
@@ -16,13 +18,15 @@ class BaseTool:
         __str__(): Returns a string representation of the tool.
     """
 
-    def __init__(self, name: str, description: str, version: str, args: Optional[dict] = None):
+    def __init__(
+        self, name: str, description: str, version: str, args: Optional[dict] = None
+    ):
         self.name: str = name
         self.description = description
         self.version = version
-        self.args: dict = args or {} # argument: description(type)
+        self.args: dict = args or {}  # argument: description(type)
         self.tool_type: str = "AU"  # Assistant
-        self.tool_output = 'default'
+        self.tool_output = "default"
 
     def run(self):
         """Abstract method to run the tool."""
@@ -200,5 +204,5 @@ class ToolImageOutput:
         __str__(): Returns a string representation of the tool image output.
     """
 
-    def __init__(self):
-        self.image = None
+    def __init__(self, image: Image.Image):
+        self.image = image

@@ -1,7 +1,12 @@
 import streamlit as st
 from GeoAwareGPT import Agent, GeminiModel, GeminiModelConfig, ToolHandler
 from GeoAwareGPT.schema import BaseTool, BaseState
-from GeoAwareGPT.tools.azure_integration import GeoCode, SearchPOI, GeoDecode, SatelliteImage
+from GeoAwareGPT.tools.azure_integration import (
+    GeoCode,
+    SearchPOI,
+    GeoDecode,
+    SatelliteImage,
+)
 import asyncio, json
 from json import JSONDecodeError
 import litellm
@@ -70,7 +75,9 @@ st.write(
 )
 st.write("Please enter your query below:")
 user_input = st.text_input("User Query", "")
-image_input = st.file_uploader("Upload an Image", accept_multiple_files=False, type='png')
+image_input = st.file_uploader(
+    "Upload an Image", accept_multiple_files=False, type="png"
+)
 
 if st.button("Submit"):
     c = 0
@@ -84,7 +91,7 @@ if st.button("Submit"):
             image, text, AUA, audio = asyncio.run(agent.agent_loop())
             if image:
                 for img in image.values():
-                    st.image(img)
+                    st.image(img.image)
             st.write("Audio", audio)
             st.write("Tool Result:", text)
             st.session_state.AUA = AUA

@@ -100,7 +100,9 @@ class Agent:
         tool_results_display: Dict[str, Image.Image] = {}
         tool_results_text = {}
         for i in tool_results:
-            if isinstance(tool_results[i], ToolImageOutput) or isinstance(tool_results[i], Image.Image):
+            if isinstance(tool_results[i], ToolImageOutput) or isinstance(
+                tool_results[i], Image.Image
+            ):
                 tool_results_display[i] = tool_results[i]
                 tool_results_text[i] = "Image shown to user"
             else:
