@@ -44,15 +44,11 @@ states = [
     BaseState(
         name="GlobalState",
         goal="To Answer the user's query regarding geography using the tools available to the assistant",
-<<<<<<< Updated upstream
-        instructions="1.CALL ONE TOOL AT A TIME and respond to the user with the information fetched from the tool. YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION. Only if you are sure that you have answered the user's query then do not call any tools",
-=======
         instructions="""- CALL ONLY ONE TOOL AT A TIME and respond to the user with the information fetched from the tool.
         - If the query requires you to decide based on some information or if it involves Geo-Technical Terms that you need to calculate then use the TOOL:KnowledgeBase to get the information about it and use that information to take the decision as a whole. 
         - YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION. Only if you are sure that you have answered the user's query then do not call any tools. 
         - Call tool with the right argument types. Use float or int for any numerical inputs
         - Give detailed answer about the query asked by the user, try to answer and solve the query as much as possible using the data available through different tools""",
->>>>>>> Stashed changes
         tools=tools,
     )
 ]
