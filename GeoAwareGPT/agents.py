@@ -84,7 +84,7 @@ An image can be inserted as an argument directly - "args": {{"<arg_name>": "$ima
         self.images.append(image)
 
     async def get_assistant_response(self):
-        print(self.messages.chat)
+        # print(self.messages.chat)
         response = await self.model.generate(self.messages)
         if response and response.choices: # type: ignore
             answer: str = response.choices[0].message.content # type: ignore
