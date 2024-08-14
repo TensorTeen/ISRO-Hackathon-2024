@@ -53,7 +53,7 @@ states = [
         - If the query requires you to decide based on some information or if it involves Geo-Technical Terms that you need to calculate then use the TOOL:KnowledgeBase to get the information about it and use that information to take the decision as a whole.
         - TOOL:SQLGenerator contains information on roads, railways, landuse, places, points""",
         tools=tools,
-    )
+    )
 ]
 # TOOL:KnowledgeBase to get the information about it and use that information to take the decision as a whole. 
 tool_handler = ToolHandler(tools=tools)
