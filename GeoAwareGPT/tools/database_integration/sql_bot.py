@@ -62,7 +62,7 @@ class SQLGenerator(BaseTool):
             session (sqlalchemy.orm.sessionmaker): SQLAlchemy session
         """
         name = 'SQLGenerator'
-        description = """Generates and executes SQL queries on a POSTGIS database containing the following tables: city boundaries, land use, aadhaar enrolment centres, waterways, natural, points, places, buildings. This requires geocoded data (latitude and longitude) for queries involving other places.
+        description = """Generates and executes SQL queries on a POSTGIS database containing the following tables: city boundaries, land use, aadhaar enrolment centres, waterways, natural, buildings, railways, roads. This requires geocoded data (latitude and longitude) for queries involving other places.
         """
         args = {
             "instructions": "Give detailed instructions on what the query should accomplish. The SQL generator will be given the database schema and the natural language instructions. ENSURE THAT COORDINATES ARE INCLUDED IN THE INSTRUCTIONS FOR ANY PLACE. Mention table names that could be relevant."
@@ -89,7 +89,7 @@ class SQLGenerator(BaseTool):
             BaseState(
                 name="GlobalState",
                 goal="To generate an SQL query to extract the relevant information from a geospatial POSTGIS database.",
-                instructions="YOUR OUTPUT SHOULD BE GROUNDED ON THE DATABASE SCHEMA, DO NOT HALLUCINATE INFORMATION.",
+                instructions="YOUR OUTPUT SHOULD BE GROUNDED ON THE DATABASE SCHEMA, DO NOT HALLUCINATE INFORMATION. THE ONLY COORDINATE INFORMATION AVAILABLE TO YOU IS THROUGH THE INSTRUCTIONS. RETURN CANNOT SOLVE ALONG WITH THE REASON IF YOU DON'T HAVE SUFFICIENT INFORMATION. DO NOT INCLUDE the geometry column in the output when querying the database. Return data in metric units when possible.",
                 tools=[],
             )
         ]
@@ -125,11 +125,15 @@ class SQLGenerator(BaseTool):
             success_flag = False
             self.agent.add_user_message(instructions)
             count = 0
+            valid_flag = False
             while not success_flag:
                 if count==5:
                     return None
                 count+=1
-                response = await self.agent.get_assistant_response()
+                if not valid_flag:
+                    response = await self.agent.get_assistant_response()
+                else:
+                    valid_flag = False
                 pattern = '```json(.*?)```'
                 matches = re.findall(pattern, response, re.DOTALL)
                 json_string = matches[-1].strip() if matches else response
@@ -145,19 +149,40 @@ class SQLGenerator(BaseTool):
                                                 }""")
                     continue
                 if "CANNOT_SOLVE" in sql:
-                    return "Query cannot be solved with given data."
+                    return f"Query cannot be solved with given data: {response}"
                 query = text(sql)
                 print(f"SQL QUERY: {query}")
                 try:
                     result = session.execute(query)
-                    rows = result.fetchall()
+                    rows = result.fetchall()[:10]
                     success_flag = True
                 except Exception as error:
                     self.agent.add_user_message(f"ERROR: {error}. Please check the database schema and try again.")
                     session.rollback()
                     print(error)
                     continue
-        return rows
+                if success_flag:
+                    print("Validating...")
+                    valid_flag = True
+                    self.agent.add_user_message(f"Query Output: {rows}.\nIf the result answers the initial instructions, simply return 'COMPLETE' in place of the SQL query. Else, continue generating SQL in the same way until satisfied. Remember to use WHERE column_name IS NOT NULL to avoid empty results.")
+                    response = await self.agent.get_assistant_response()
+                    if 'COMPLETE' in response:
+                        print("Valid.")
+                        output = []
+                        for row in rows:
+                            output.append(tuple([i for i in row if len(str(i))<50]))
+                        return output
+                    else:
+                        if 'CANNOT_SOLVE' in response:
+                            return f"Model failed to generate SQL query with the given instructions. {response}"
+                    print(f"Not satisfied: {response}")
+                    success_flag = False
+        print("Exiting...")
+        output = []
+        for row in rows:
+            if row:
+                output.append(tuple([i for i in row if len(str(i))<50]))
+        return output
         # return rows if rows else None
 
     def get_db_description(self):
@@ -189,7 +214,7 @@ class SQLGenerator(BaseTool):
         
         # Group by schema and table to create structured descriptions
         for (schema, table), group in df.groupby(['schema_name', 'table_name']):
-            if table in ['table_name', 'spatial_ref_sys', 'raster_overviews', 'raster_columns', 'geometry_columns', 'geography_columns']:
+            if table in ['table_name', 'spatial_ref_sys', 'raster_overviews', 'raster_columns', 'places', 'points']:
                 continue
             description += f"Schema: {schema}\n"
             description += f"Table: {table}\n"
@@ -217,7 +242,7 @@ class SQLGenerator(BaseTool):
                     if row['column_name'] == 'geom' or not any([ch in row['data_type'] for ch in ['character', 'numeric']]) or row['column_name'] == 'srtext':
                         continue
                     example_values = sample_data[row['column_name']].dropna().unique()
-                    example_values_str = ', '.join(map(str, example_values[:7]))  # Take first 3 unique examples
+                    example_values_str = ', '.join(map(str, example_values[:5]))  # Take first 3 unique examples
                     if example_values_str:
                         column_desc += f", Examples: {example_values_str}"
                 
