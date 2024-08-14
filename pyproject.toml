@@ -2,8 +2,7 @@
 name = "geoawaregpt"
 version = "0.1.0"
 description = "package created for isro hackathon"
-authors = ["TensorTeen <varsity368@gmail.com>"]
-license = "GPL"
+authors = ["TensorTeen <varsity368@gmail.com>", "GeorgeRyan05 <george.ryanjacob2@gmail.com", "jellyfish2004 <mahendrakurup2004@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
@@ -15,7 +14,28 @@ python-dotenv = "^1.0.1"
 asyncio = "^3.4.3"
 segment-geospatial = "^0.10.6"
 sqlalchemy = "^2.0.31"
-langchain_community = "^0.2.12"
+langchain = "0.2.13"
+langchain-community = "0.2.12"
+langchain-core = "0.2.30"
+langchain-openai = "0.1.21"
+langchain-text-splitters = "0.2.2"
+azure-ai-documentintelligence = "^1.0.0b3"
+azure-ai-formrecognizer = "^3.3.3"
+azure-ai-ml = "^1.18.0"
+azure-ai-translation-text = "^1.0.0b1"
+azure-cognitiveservices-speech = "^1.40.0"
+azure-common = "^1.1.28"
+azure-core = "^1.30.2"
+azure-identity = "^1.17.1"
+azure-maps-render = "^1.0.0b2"
+azure-maps-search = "^1.0.0b2"
+azure-mgmt-core = "^1.4.0"
+azure-storage-blob = "^12.22.0"
+azure-storage-file-datalake = "^12.16.0"
+azure-storage-file-share = "^12.17.0"
+azureml-inference-server-http = "^1.3.0"
+faiss-cpu = "1.8.0.post1"
+groundingdino-py = "0.4.0"
 
 [build-system]
 requires = ["poetry-core"]

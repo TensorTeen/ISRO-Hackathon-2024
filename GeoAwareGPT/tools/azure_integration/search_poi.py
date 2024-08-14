@@ -61,7 +61,9 @@ class SearchPOI(BaseTool):
         converted_result["category"] = str(result.additional_properties)
         converted_result["url"] = str(result.url)
         converted_result["opening_hours"] = str(result.operating_hours)
-
+        import pprint
+        print('\n\n')
+        pprint.pprint((result.__dict__))
         return json.dumps(converted_result, indent=4)
 
 
