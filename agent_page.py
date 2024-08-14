@@ -115,7 +115,7 @@ with st.sidebar:
         'en-US': 'en-US',
         'हिन्दी': 'hi-IN'
     }
-    language: str = st.selectbox('Language', ('en-US', 'हिन्दी'))
+    language: str = cast(str, st.selectbox('Language', ('en-US', 'हिन्दी')))
     language = lang_map[language]
     microphone = st.button('Microphone', on_click=on_microphone)
     audio_output = st.toggle('Audio Output')
