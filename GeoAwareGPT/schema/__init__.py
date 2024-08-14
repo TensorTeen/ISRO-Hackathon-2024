@@ -6,7 +6,8 @@ from .schema import (
     QueryInput,
     ChatBuilder,
     BaseState,
-    ToolImageOutput
+    ToolImageOutput,
+    ToolCustomOutput
 )
 from .azure_schema import AzureTool
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
     "ChatBuilder",
     "BaseState",
     "AzureTool",
-    "ToolImageOutput"
+    "ToolImageOutput",
+    "ToolCustomOutput"
 ]

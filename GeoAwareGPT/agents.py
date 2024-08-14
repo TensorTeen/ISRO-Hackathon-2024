@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 from .schema import GeminiModelConfig, AzureModelConfig, ChatBuilder, BaseTool, BaseState
 from .ToolHandler import ToolHandler
-from GeoAwareGPT.schema.schema import ToolImageOutput
+from GeoAwareGPT.schema import ToolImageOutput, ToolCustomOutput
 
 load_dotenv()
 
@@ -150,21 +150,25 @@ An image can be inserted as an argument directly - "args": {{"<arg_name>": "$ima
                     args[arg] = self.images[int(img.group('num'))]
         return tools, info
 
-    async def agent_loop(self) -> Tuple[Dict[str, ToolImageOutput], Dict[str, str], bool, str]:
+    async def agent_loop(self) -> Tuple[Dict[str, ToolImageOutput], Dict[str, str], bool, Dict[str, str], Dict[str, ToolCustomOutput]]:
         print(self.messages.chat)
         response: str|Dict[str, Any] = await self.get_assistant_response()
         tool_calls, response = self.extract_info(response)
         if not tool_calls:
-            return {}, {}, False, response["audio"]
+            return {}, {}, False, response["audio"], {}
         tool_results = await self.tool_handler.handle_tool(tool_calls)
         AUA = tool_results.get("AUA", False)
         tool_results_display: Dict[str, ToolImageOutput] = {}
+        tool_results_custom: Dict[str, ToolCustomOutput] = {}
         tool_results_text = {}
         for key in tool_results:
             if isinstance(out := tool_results[key], ToolImageOutput):
                 self.add_input_image(out.image)
                 tool_results_display[key] = out
                 tool_results_text[key] = "Image shown to user"
+            elif isinstance(out, ToolCustomOutput):
+                tool_results_custom[key] = out
+                tool_results_text[key] = out.output
             else:
                 tool_results_text[key] = str(tool_results[key])
         self.add_user_message(str({"tool_results": json.dumps(tool_results_text)}))

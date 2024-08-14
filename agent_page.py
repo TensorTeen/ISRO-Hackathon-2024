@@ -5,7 +5,9 @@ from PIL import Image
 from typing import cast, Optional
 import io
 
+import folium
 import streamlit as st
+from streamlit_folium import st_folium, folium_static
 
 import litellm
 
@@ -35,7 +37,7 @@ tools = [
     GeoDecode(),
     SatelliteImage(),
     Weather(),
-    KnowledgeBase(),
+    # KnowledgeBase(),
     SegmentationTool(),
     FindDistance(),
     SQLGenerator(),
@@ -45,14 +47,16 @@ states = [
         name="GlobalState",
         goal="To Answer the user's query regarding geography using the tools available to the assistant",
         instructions="""- CALL ONLY ONE TOOL AT A TIME and respond to the user with the information fetched from the tool.
-        - If the query requires you to decide based on some information or if it involves Geo-Technical Terms that you need to calculate then use the TOOL:KnowledgeBase to get the information about it and use that information to take the decision as a whole. 
+        - If the query requires you to decide based on some information or if it involves Geo-Technical Terms that you need to calculate then use the 
         - YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION. Only if you are sure that you have answered the user's query then do not call any tools. 
         - Call tool with the right argument types. Use float or int for any numerical inputs
         - Give detailed answer about the query asked by the user, try to answer and solve the query as much as possible using the data available through different tools""",
         tools=tools,
     )
 ]
+# TOOL:KnowledgeBase to get the information about it and use that information to take the decision as a whole. 
 tool_handler = ToolHandler(tools=tools)
+
 if "initialized" not in st.session_state or not st.session_state.initialized:
     print("Initializing agent")
     st.session_state.agent = Agent(
@@ -66,19 +70,22 @@ if "initialized" not in st.session_state or not st.session_state.initialized:
     st.session_state.agent.set_system_prompt(SYSTEM_PROMPT)
     st.session_state.AUA = cast(bool, True)
     st.session_state.mic = None
+    st.session_state.markers = []
 
-st.title("GeoAwareGPT")
-st.write(
-    "Welcome to GeoAwareGPT, your friendly conversational assistant for geography-related queries."
-)
-def on_microphone():
-    audio_input = st.chat_input("Please speak...")
-    if not language.split('-')[0] == 'en':
-        result, _ = translator.translate_speech(language, 'en')
-        st.session_state.mic = result
-    else:
-        user_input = translator.recognize_from_microphone()
-        st.session_state.mic = user_input
+col1, col2 = st.columns(2)
+with col1:
+    st.title("GeoAwareGPT")
+    st.write(
+        "Welcome to GeoAwareGPT, your friendly conversational assistant for geography-related queries."
+    )
+    def on_microphone():
+        audio_input = st.chat_input("Please speak...")
+        if not language.split('-')[0] == 'en':
+            result, _ = translator.translate_speech(language, 'en')
+            st.session_state.mic = result
+        else:
+            user_input = translator.recognize_from_microphone()
+            st.session_state.mic = user_input
 with st.sidebar:
     lang_map = {
         'en-US': 'en-US',
@@ -97,39 +104,40 @@ for user_input in st.session_state.messages:
             st.markdown(content)
 
 agent = st.session_state.agent
-
-img_file: Optional[io.BytesIO] = st.file_uploader(
-    "Upload an Image", accept_multiple_files=False, type="png"
-)
-image_input: Optional[Image.Image] = Image.open(img_file) if img_file else None
-if image_input:
-    agent.add_input_image(image_input) # ! Must be done before query
-    st.session_state.messages.append({
-        "role": "User",
-        "content": image_input
-    })
-translator = Speech()
-if st.session_state.mic:
-    if not language.split('-')[0] == 'en':
-        result = st.session_state.mic
-        user_input = result.text
+with col1:
+    img_file: Optional[io.BytesIO] = st.file_uploader(
+        "Upload an Image", accept_multiple_files=False, type="png"
+    )
+    image_input: Optional[Image.Image] = Image.open(img_file) if img_file else None
+    if image_input:
+        agent.add_input_image(image_input) # ! Must be done before query
+        st.session_state.messages.append({
+            "role": "User",
+            "content": image_input
+        })
+    translator = Speech()
+    if st.session_state.mic:
+        if not language.split('-')[0] == 'en':
+            result = st.session_state.mic
+            user_input = result.text
+        else:
+            user_input = st.session_state.mic
+        st.session_state.mic = None
     else:
-        user_input = st.session_state.mic
-    st.session_state.mic = None
-else:
-    user_input = st.chat_input("Please enter your query...")
-    if user_input and language.split('-')[0] != 'en':
-        user_input = translator.translate_text(user_input, from_language=language, to_language='en')
-# user_input = st.text_input("User Query", "")
+        user_input = st.chat_input("Please enter your query...")
+        if user_input and language.split('-')[0] != 'en':
+            user_input = translator.translate_text(user_input, from_language=language, to_language='en')
+    # user_input = st.text_input("User Query", "")
+    if user_input:
+        if not microphone:
+            with st.chat_message('User'):
+                st.markdown(f'{user_input}')
+            st.session_state.messages.append({"role": "User", "content": user_input})
+        else:
+            with st.chat_message('User'):
+                st.markdown(f'{user_input}')
+            st.session_state.messages.append({"role": "User", "content": user_input})
 if user_input:
-    if not microphone:
-        with st.chat_message('User'):
-            st.markdown(f'{user_input}')
-        st.session_state.messages.append({"role": "User", "content": user_input})
-    else:
-        with st.chat_message('User'):
-            st.markdown(f'{user_input}')
-        st.session_state.messages.append({"role": "User", "content": user_input})
     c = 0
     agent.add_user_message(user_input if language.split('-')[0] == 'en' else result.translations['en'])
     while True:
@@ -138,7 +146,7 @@ if user_input:
             st.write("Too many iterations, breaking")
             break
         if st.session_state.AUA:
-            image, text, AUA, audio = asyncio.run(agent.agent_loop())
+            image, text, AUA, audio, custom = asyncio.run(agent.agent_loop())
             if image:
                 for img in image.values():
                     st.image(img.image, use_column_width=True)
@@ -146,12 +154,21 @@ if user_input:
                         "role": "Assistant",
                         "content": img.image
                     })
+            if custom:
+                for key, val in custom.items():
+                    if val.metadata['type'] == 'coordinates':
+                        mp = folium.Map(val.metadata['coordinates'], zoom_start=5, control_scale=True)
+                        folium.Marker(val.output, popup=val.metadata.get('name')).add_to(mp)
+                        st.session_state.markers.append(val.output)
+                        folium_static(mp, width=600, height=750)
             with st.chat_message('Audio'):
                 if not language.split('-')[0] == 'en':
                     audio = translator.translate_text(audio)
                 st.markdown(f'Audio: {audio}')
                 if audio_output:
-                    translator.text_to_speech(audio, language.split('-')[0]+'-IN')
+                    translator.text_to_speech(audio, language.split('-')[0]+'-
+                                              
+                                              IN')
             with st.chat_message('Assistant'):
                 st.markdown(f'Tool Result: {text}')
             st.session_state.messages.append({"role": "Assistant", "content": text})
@@ -162,3 +179,7 @@ if user_input:
         else:
             break
     st.session_state.AUA = True
+
+with col2:
+    mp = folium.Map((17.4065, 78.4772), zoom_start=5, control_scale=True)
+    folium_static(mp, width=600, height=750)

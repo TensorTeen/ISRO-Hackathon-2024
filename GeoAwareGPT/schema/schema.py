@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import os
 from PIL import Image
 
@@ -230,3 +230,11 @@ class ToolImageOutput:
 
     def __init__(self, image: Image.Image):
         self.image = image
+
+class ToolCustomOutput:
+    """A class representing the output of a tool with a location"""
+    def __init__(self, output, metadata: Optional[Dict[str, Any]] = None):
+        self.output = output
+        self.metadata = metadata or {}
+    def custom_logic(self):
+        pass
