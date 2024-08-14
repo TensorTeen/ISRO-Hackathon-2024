@@ -8,7 +8,7 @@ from azure.identity import DefaultAzureCredential
 from azure.maps.render import MapsRenderClient
 
 dotenv.load_dotenv()
-client_id = os.environ['AZURE_CLIENT_ID']
+client_id = os.environ['AZURE_CLIENT_ID'] # ID of the Azure Maps resource
 subscription_key = os.environ['AZURE_SUBSCRIPTION_KEY']
 print(f'{client_id=}\n{subscription_key=}')
 credential = DefaultAzureCredential()
