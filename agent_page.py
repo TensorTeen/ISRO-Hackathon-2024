@@ -65,6 +65,7 @@ states = [
 tool_handler = ToolHandler(tools=tools)
 
 col1, col2 = st.columns(2)
+col1 = col1.container(height=750)
 if "initialized" not in st.session_state or not st.session_state.initialized:
     print("Initializing agent")
     st.session_state.agent = Agent(
@@ -179,7 +180,7 @@ if user_input:
             if custom:
                 for key, val in custom.items():
                     if val.metadata['type'] == 'coordinates':
-                        mp.location = val.output['latitude'], val.output['longitude']
+                        mp.location = val.output['latitude'], val.output['longitude'] # type: ignore
                         folium.Marker(mp.location, popup=val.metadata.get('name')).add_to(mp)
                         st.session_state.markers.append(val.output)
                         if len(st.session_state.markers) > 1:
