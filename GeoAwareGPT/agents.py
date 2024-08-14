@@ -150,7 +150,7 @@ An image can be inserted as an argument directly - "args": {{"<arg_name>": "$ima
                     args[arg] = self.images[int(img.group('num'))]
         return tools, info
 
-    async def agent_loop(self) -> Tuple[Dict[str, ToolImageOutput], Dict[str, str], bool, Dict[str, str], Dict[str, ToolCustomOutput]]:
+    async def agent_loop(self) -> Tuple[Dict[str, ToolImageOutput], Dict[str, str], bool, str, Dict[str, ToolCustomOutput]]:
         print(self.messages.chat)
         response: str|Dict[str, Any] = await self.get_assistant_response()
         tool_calls, response = self.extract_info(response)
@@ -172,4 +172,4 @@ An image can be inserted as an argument directly - "args": {{"<arg_name>": "$ima
             else:
                 tool_results_text[key] = str(tool_results[key])
         self.add_user_message(str({"tool_results": json.dumps(tool_results_text)}))
-        return tool_results_display, tool_results_text, AUA, response["audio"]
+        return tool_results_display, tool_results_text, AUA, response["audio"], tool_results_custom

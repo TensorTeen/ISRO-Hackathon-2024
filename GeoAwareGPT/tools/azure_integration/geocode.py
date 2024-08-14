@@ -2,7 +2,7 @@ import azure.maps.search as azsearch
 import os
 from dotenv import load_dotenv
 from azure.core.credentials import AzureKeyCredential
-from ...schema import BaseTool
+from ...schema import BaseTool, ToolCustomOutput
 
 load_dotenv()
 
@@ -37,4 +37,4 @@ class GeoCode(BaseTool):
         result = results.results[0]
 
         # Return the location
-        return result.position
+        return ToolCustomOutput({'latitude':result.position.lat, 'longitude': result.position.lon}, metadata={"type": "coordinates", "name": address})

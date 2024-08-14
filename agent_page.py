@@ -2,13 +2,12 @@ import asyncio
 import json
 from json import JSONDecodeError
 from PIL import Image
-from typing import cast, Optional
+from typing import cast, Optional, List, Tuple
 import io
 
 import folium
 import streamlit as st
-from streamlit_folium import st_folium, folium_static
-
+from streamlit_folium import folium_static, st_folium
 import litellm
 
 from GeoAwareGPT import Agent, GeminiModel, GeminiModelConfig, ToolHandler
@@ -23,7 +22,7 @@ from GeoAwareGPT.tools.azure_integration import (
 from GeoAwareGPT.tools.azure_integration.find_distance import FindDistance
 from GeoAwareGPT.tools.image_segment import SegmentationTool
 from GeoAwareGPT.tools.RAG_Tool import KnowledgeBase
-from GeoAwareGPT.tools.database_integration.sql_bot import SQLGenerator
+# from GeoAwareGPT.tools.database_integration.sql_bot import SQLGenerator
 
 from asr_tts import Speech
 
@@ -40,7 +39,7 @@ tools = [
     # KnowledgeBase(),
     SegmentationTool(),
     FindDistance(),
-    SQLGenerator(),
+    # SQLGenerator(),
 ]
 states = [
     BaseState(
@@ -57,6 +56,7 @@ states = [
 # TOOL:KnowledgeBase to get the information about it and use that information to take the decision as a whole. 
 tool_handler = ToolHandler(tools=tools)
 
+col1, col2 = st.columns(2)
 if "initialized" not in st.session_state or not st.session_state.initialized:
     print("Initializing agent")
     st.session_state.agent = Agent(
@@ -71,8 +71,20 @@ if "initialized" not in st.session_state or not st.session_state.initialized:
     st.session_state.AUA = cast(bool, True)
     st.session_state.mic = None
     st.session_state.markers = []
+    st.session_state.popups = []
+    with col2:
+        st.session_state.map = folium.Map((17.4065, 78.4772), zoom_start=5, control_scale=True)
+with col2:
+    mp = st.session_state.map
+    for marker, popup in zip(st.session_state.markers, st.session_state.popups):
+        folium.Marker(marker, popup).add_to(mp)
 
-col1, col2 = st.columns(2)
+def bounds(markers: List[Tuple[float, float]]) -> Tuple[Tuple[float, float], Tuple[float, float]]:
+    lats, lons = zip(*markers)
+    return (min(lats), min(lons)), (max(lats), max(lons))
+
+
+
 with col1:
     st.title("GeoAwareGPT")
     st.write(
@@ -86,6 +98,9 @@ with col1:
         else:
             user_input = translator.recognize_from_microphone()
             st.session_state.mic = user_input
+    img_file: Optional[io.BytesIO] = st.file_uploader(
+        "Upload an Image", accept_multiple_files=False, type="png"
+    )
 with st.sidebar:
     lang_map = {
         'en-US': 'en-US',
@@ -96,18 +111,16 @@ with st.sidebar:
     microphone = st.button('Microphone', on_click=on_microphone)
     audio_output = st.toggle('Audio Output')
 for user_input in st.session_state.messages:
-    with st.chat_message(user_input["role"]):
-        content = user_input["content"]
-        if isinstance(content, Image.Image):
-            st.image(content, use_column_width=True)
-        else:
-            st.markdown(content)
+    with col1:
+        with st.chat_message(user_input["role"]):
+            content = user_input["content"]
+            if isinstance(content, Image.Image):
+                st.image(content, use_column_width=True)
+            else:
+                st.markdown(content)
 
 agent = st.session_state.agent
 with col1:
-    img_file: Optional[io.BytesIO] = st.file_uploader(
-        "Upload an Image", accept_multiple_files=False, type="png"
-    )
     image_input: Optional[Image.Image] = Image.open(img_file) if img_file else None
     if image_input:
         agent.add_input_image(image_input) # ! Must be done before query
@@ -149,7 +162,8 @@ if user_input:
             image, text, AUA, audio, custom = asyncio.run(agent.agent_loop())
             if image:
                 for img in image.values():
-                    st.image(img.image, use_column_width=True)
+                    with col1:
+                        st.image(img.image, use_column_width=True)
                     st.session_state.messages.append({
                         "role": "Assistant",
                         "content": img.image
@@ -157,29 +171,39 @@ if user_input:
             if custom:
                 for key, val in custom.items():
                     if val.metadata['type'] == 'coordinates':
-                        mp = folium.Map(val.metadata['coordinates'], zoom_start=5, control_scale=True)
-                        folium.Marker(val.output, popup=val.metadata.get('name')).add_to(mp)
+                        mp.location = val.output['latitude'], val.output['longitude']
+                        folium.Marker(mp.location, popup=val.metadata.get('name')).add_to(mp)
                         st.session_state.markers.append(val.output)
-                        folium_static(mp, width=600, height=750)
-            with st.chat_message('Audio'):
-                if not language.split('-')[0] == 'en':
-                    audio = translator.translate_text(audio)
-                st.markdown(f'Audio: {audio}')
-                if audio_output:
-                    translator.text_to_speech(audio, language.split('-')[0]+'-
-                                              
-                                              IN')
-            with st.chat_message('Assistant'):
-                st.markdown(f'Tool Result: {text}')
+                        if len(st.session_state.markers) > 1:
+                            mp.fit_bounds(bounds(st.session_state.markers))
+                        # with col2:
+                        #     folium_static(mp, width=600, height=750)
+                        with col2:
+                            # fs = folium_static(mp, width=600, height=750)
+                            pass
+            else:
+                with col2:
+                    # fs = folium_static(mp, width=600, height=750)
+                    pass
+            
+            with col1:
+                with st.chat_message('Audio'):
+                    if not language.split('-')[0] == 'en':
+                        audio = translator.translate_text(audio)
+                    st.markdown(f'Audio: {audio}')
+                    if audio_output:
+                        translator.text_to_speech(audio, language.split('-')[0]+'-IN')
+                with st.chat_message('Assistant'):
+                    st.markdown(f'Tool Result: {text}')
             st.session_state.messages.append({"role": "Assistant", "content": text})
             st.session_state.messages.append({"role": "Audio", "content": audio})
             st.session_state.AUA = AUA
             c += 1
             continue
         else:
+            print("Breaking")
             break
     st.session_state.AUA = True
-
 with col2:
-    mp = folium.Map((17.4065, 78.4772), zoom_start=5, control_scale=True)
-    folium_static(mp, width=600, height=750)
+    fs = folium_static(mp, width=600, height=750)
+
