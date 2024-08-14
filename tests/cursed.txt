@@ -1,0 +1,62 @@
+Microsoft Windows [Version 10.0.22631.3880]
+(c) Microsoft Corporation. All rights reserved.
+
+(isro_geospatial_data_retrieval) D:\Hackathons\ISRO 2024 Geospatial Data Retrieval>cd ISRO-Hackathon
+
+(isro_geospatial_data_retrieval) D:\Hackathons\ISRO 2024 Geospatial Data Retrieval\ISRO-Hackathon>py
+Python 3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import GeoAwareGPT
+D:\Hackathons\ISRO 2024 Geospatial Data Retrieval\ISRO-Hackathon\GeoAwareGPT\agents.py:107: SyntaxWarning: invalid escape sequence '\g'
+  response = re.sub(r'"\$image_(?P<num>[0-9]+)\$"', '"<image_\g<num>>"', response) # type: ignore
+Logging at D:\Hackathons\ISRO 2024 Geospatial Data Retrieval\ISRO-Hackathon\GeoAwareGPT\log\logs.log
+>>> quit
+Use quit() or Ctrl-Z plus Return to exit
+>>> quit()
+
+(isro_geospatial_data_retrieval) D:\Hackathons\ISRO 2024 Geospatial Data Retrieval\ISRO-Hackathon>cd tests
+
+(isro_geospatial_data_retrieval) D:\Hackathons\ISRO 2024 Geospatial Data Retrieval\ISRO-Hackathon\tests>py
+Python 3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import GeoAwareGPT
+[
+  {
+    "name": "SegmentationTool",
+    "args": {
+      "input_prompt": "buildings",
+      "input_image": "image_0"
+    }
+  }
+]
+[
+  {
+    "name": "SegmentationTool",
+    "args": {
+      "input_prompt": "buildings",
+      "input_image": ""<image_0>""
+    }
+  }
+]
+[
+  {
+    "name": "SegmentationTool",
+    "args": {
+      "input_prompt": "buildings",
+      "input_image": "image_0"
+    }
+  }
+]
+Logging at D:\Hackathons\ISRO 2024 Geospatial Data Retrieval\ISRO-Hackathon\GeoAwareGPT\log\logs.log
+>>> quit()
+
+(isro_geospatial_data_retrieval) D:\Hackathons\ISRO 2024 Geospatial Data Retrieval\ISRO-Hackathon\tests>cd ../..
+
+(isro_geospatial_data_retrieval) D:\Hackathons\ISRO 2024 Geospatial Data Retrieval>py
+Python 3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import GeoAwareGPT
+Logging at D:\Hackathons\ISRO 2024 Geospatial Data Retrieval\ISRO-Hackathon\GeoAwareGPT\log\logs.log
+>>> quit()
+
+(isro_geospatial_data_retrieval) D:\Hackathons\ISRO 2024 Geospatial Data Retrieval>
