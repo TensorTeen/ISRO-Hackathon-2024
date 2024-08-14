@@ -13,54 +13,38 @@ import pandas as pd
 
 
 SYSTEM_PROMPT = """
-You are a helpful conversational assistant. Below are the details about the use case which you need to abide by strictly:
-<usecase_details>
-you are an agent that helps users with their queries related to geography. You have access to an SQL database and a tool that you can use to execute SQL queries that can help you fetch information about a location, and more.
-</usecase_details>
+You are a helpful conversational assistant. Below are the details about the use case that you need to abide by strictly:
 
-You are currently in a specific state of the conversational-flow described below 
-Details about the current-state:
-Instructions to be followed:
-- The thought should be very descriptive and should include the reason for generating the given sql query.
-- Do not generate unicode characters or hindi characters at all.
+Use Case:
+You are an agent that helps users with their queries related to geography. You have access to a PostGIS-enabled SQL database and a tool to execute SQL queries that can help fetch information about a location and more. The goal is to generate SQL queries that extract the required information using the database schema provided.
 
+Instructions:
+Be Descriptive: The thought should be very descriptive and should include the reasoning for generating the SQL query.
+Incorporate PostGIS Functions: Leverage PostGIS capabilities, such as spatial relationships and geometric functions, when relevant to the query.
+Error Handling: If the query cannot be solved due to a lack of information or an invalid schema, return "CANNOT_SOLVE" in the sql_query field. Before doing so, consider possible fallbacks or partial solutions.
+Assume Reasonable Defaults: If the user's query is ambiguous, assume reasonable defaults or suggest refinements.
+Example Query Structure: Ensure that the SQL query includes a WHERE clause to filter out NULL values and uses lowercase string comparisons when needed.
+Spatial Index Use: If the query could be optimized with spatial indexing, include it in your reasoning.
+
+
+PostGIS Capabilities:
+Geometric Functions: ST_Area, ST_Distance, ST_Length.
+Spatial Relationships: ST_Intersects, ST_Within, ST_Overlaps.
+Transformations: ST_Transform, ST_SetSRID.
+Geocoding/Reverse Geocoding: ST_Geocode (if applicable).
+Raster Functions: ST_Clip, ST_Resample.
+Geospatial Indexing: Use GIST indexes for spatial optimization.
+
+
+Table Information:
+Schema: The database contains the following tables: city boundaries, land use, aadhaar enrolment centres, waterways, natural, points, places, buildings.
 Respond to the user in the conversation strictly following the below JSON format:
 {
-    "thought": "...",  # Thought process of the bot to decide what content to reply with, which tool(s) to call, briefly describing reason for tool arguments as well
-    "sql_query": "..."  # SQL query to be executed. End sql code with a semicolon (;)
+    "thought": "I identified that the user wants to retrieve geographical information about a place. The relevant table based on the schema is [table_name], and the key columns are [columns]. I will use PostGIS functions like [function_name] to perform the required spatial operations.",
+    "sql_query": "SELECT ... FROM ... WHERE ...;"
 }
 
-PostGIS Capabilities Description:
-
-PostGIS extends PostgreSQL to support geographic objects. Here are some of the key geospatial functions and capabilities:
-
-1. **Geometric Functions:**
-   - `ST_Area(geometry)`: Returns the area of a geometry.
-   - `ST_Distance(geomA, geomB)`: Computes the distance between two geometries.
-   - `ST_Length(geometry)`: Returns the length of a geometry.
-
-2. **Spatial Relationships:**
-   - `ST_Intersects(geomA, geomB)`: Checks if two geometries intersect.
-   - `ST_Within(geomA, geomB)`: Checks if one geometry is within another.
-   - `ST_Overlaps(geomA, geomB)`: Checks if two geometries overlap.
-
-3. **Transformations:**
-   - `ST_Transform(geometry, srid)`: Transforms a geometry to a different spatial reference system.
-   - `ST_SetSRID(geometry, srid)`: Sets the SRID for a geometry.
-
-4. **Geocoding and Reverse Geocoding:**
-   - `ST_Geocode(address)`: Converts an address into geographic coordinates (requires additional setup).
-
-5. **Raster Functions:**
-   - `ST_Clip(raster, geometry)`: Clips a raster to a specified geometry.
-   - `ST_Resample(raster, scale_factor)`: Resamples a raster with a given scale factor.
-
-6. **Geospatial Indexing:**
-   - PostGIS supports the creation of spatial indexes to optimize geospatial queries using GIST indexes.
-
-These functions can be used to perform complex geospatial analyses and queries, enhancing the capabilities of your database with spatial data.
-
-Given below are table names and their corresponding column names with example values. You are to only use the column and table names mentioned below. While doing string comparisons convert both sides to lower case. ENSURE THAT TABLE NAMES AND FIELD NAMES ARE VALID. Return 'CANNOT_SOLVE' in the sql_query in case the query is not solvable with the given database, only if you are confident that it cannot be solved. Make sure to add a where clause to ensure that you're not returning NULL values, eg. WHERE name IS NOT NULL. Do not complicate the query.
+Database and table schema:
 """
 
 
@@ -78,10 +62,10 @@ class SQLGenerator(BaseTool):
             session (sqlalchemy.orm.sessionmaker): SQLAlchemy session
         """
         name = 'SQLGenerator'
-        description = """Generates and executes SQL queries on a POSTGIS database containing the following tables: city boundaries, land use, aadhaar enrolment centres, waterways, natural, points, places, buildings. This requires geocoded data (latitude and longitude) for queries involving other places.
+        description = """Generates and executes SQL queries on a POSTGIS database containing the following tables: city boundaries, land use, aadhaar enrolment centres, waterways, natural, buildings, railways, roads. This requires geocoded data (latitude and longitude) for queries involving other places.
         """
         args = {
-            "instructions": "Give detailed instructions on what the query should accomplish. The SQL generator will be given the database schema and the natural language instructions. ENSURE THAT COORDINATES ARE INCLUDED IN THE INSTRUCTIONS FOR ANY PLACE."
+            "instructions": "Give detailed instructions on what the query should accomplish. The SQL generator will be given the database schema and the natural language instructions. ENSURE THAT COORDINATES ARE INCLUDED IN THE INSTRUCTIONS FOR ANY PLACE. Mention table names that could be relevant."
         }
         version = '0.1'
         super().__init__(name, description, version, args)
@@ -105,7 +89,7 @@ class SQLGenerator(BaseTool):
             BaseState(
                 name="GlobalState",
                 goal="To generate an SQL query to extract the relevant information from a geospatial POSTGIS database.",
-                instructions="YOUR OUTPUT SHOULD BE GROUNDED ON THE DATABASE SCHEMA, DO NOT HALLUCINATE INFORMATION.",
+                instructions="YOUR OUTPUT SHOULD BE GROUNDED ON THE DATABASE SCHEMA, DO NOT HALLUCINATE INFORMATION. THE ONLY COORDINATE INFORMATION AVAILABLE TO YOU IS THROUGH THE INSTRUCTIONS. RETURN CANNOT SOLVE ALONG WITH THE REASON IF YOU DON'T HAVE SUFFICIENT INFORMATION. DO NOT INCLUDE the geometry column in the output when querying the database. Return data in metric units when possible.",
                 tools=[],
             )
         ]
@@ -141,11 +125,15 @@ class SQLGenerator(BaseTool):
             success_flag = False
             self.agent.add_user_message(instructions)
             count = 0
+            valid_flag = False
             while not success_flag:
                 if count==5:
                     return None
                 count+=1
-                response = await self.agent.get_assistant_response()
+                if not valid_flag:
+                    response = await self.agent.get_assistant_response()
+                else:
+                    valid_flag = False
                 pattern = '```json(.*?)```'
                 matches = re.findall(pattern, response, re.DOTALL)
                 json_string = matches[-1].strip() if matches else response
@@ -161,19 +149,40 @@ class SQLGenerator(BaseTool):
                                                 }""")
                     continue
                 if "CANNOT_SOLVE" in sql:
-                    return "Query cannot be solved with given data."
+                    return f"Query cannot be solved with given data: {response}"
                 query = text(sql)
                 print(f"SQL QUERY: {query}")
                 try:
                     result = session.execute(query)
-                    rows = result.fetchall()
+                    rows = result.fetchall()[:10]
                     success_flag = True
                 except Exception as error:
                     self.agent.add_user_message(f"ERROR: {error}. Please check the database schema and try again.")
                     session.rollback()
                     print(error)
                     continue
-        return rows
+                if success_flag:
+                    print("Validating...")
+                    valid_flag = True
+                    self.agent.add_user_message(f"Query Output: {rows}.\nIf the result answers the initial instructions, simply return 'COMPLETE' in place of the SQL query. Else, continue generating SQL in the same way until satisfied. Remember to use WHERE column_name IS NOT NULL to avoid empty results.")
+                    response = await self.agent.get_assistant_response()
+                    if 'COMPLETE' in response:
+                        print("Valid.")
+                        output = []
+                        for row in rows:
+                            output.append(tuple([i for i in row if len(str(i))<50]))
+                        return output
+                    else:
+                        if 'CANNOT_SOLVE' in response:
+                            return f"Model failed to generate SQL query with the given instructions. {response}"
+                    print(f"Not satisfied: {response}")
+                    success_flag = False
+        print("Exiting...")
+        output = []
+        for row in rows:
+            if row:
+                output.append(tuple([i for i in row if len(str(i))<50]))
+        return output
         # return rows if rows else None
 
     def get_db_description(self):
@@ -205,7 +214,7 @@ class SQLGenerator(BaseTool):
         
         # Group by schema and table to create structured descriptions
         for (schema, table), group in df.groupby(['schema_name', 'table_name']):
-            if table in ['table_name', 'spatial_ref_sys', 'raster_overviews', 'raster_columns', 'geometry_columns', 'geography_columns']:
+            if table in ['table_name', 'spatial_ref_sys', 'raster_overviews', 'raster_columns', 'places', 'points']:
                 continue
             description += f"Schema: {schema}\n"
             description += f"Table: {table}\n"
@@ -233,7 +242,7 @@ class SQLGenerator(BaseTool):
                     if row['column_name'] == 'geom' or not any([ch in row['data_type'] for ch in ['character', 'numeric']]) or row['column_name'] == 'srtext':
                         continue
                     example_values = sample_data[row['column_name']].dropna().unique()
-                    example_values_str = ', '.join(map(str, example_values[:7]))  # Take first 3 unique examples
+                    example_values_str = ', '.join(map(str, example_values[:5]))  # Take first 3 unique examples
                     if example_values_str:
                         column_desc += f", Examples: {example_values_str}"
                 
