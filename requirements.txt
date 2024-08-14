@@ -201,6 +201,8 @@ soupsieve==2.6
 SQLAlchemy==2.0.32
 stack-data==0.6.3
 streamlit==1.37.1
+streamlit-float==0.3.5
+streamlit_folium==0.22.0
 strictyaml==1.7.3
 supervision==0.6.0
 sympy==1.13.2
