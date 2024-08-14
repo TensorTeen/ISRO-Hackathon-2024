@@ -41,9 +41,11 @@ tools = [
     Weather(),
     SegmentationTool(),
     FindDistance(),
+    KnowledgeBase(),
     SQLGenerator(),
     GetLanduseData(),
     GetRailwayLength(),
+
 ]
 states = [
     BaseState(
@@ -54,10 +56,7 @@ states = [
         - YOUR OUTPUT SHOULD BE GROUNDED ON THE TOOL OUTPUT, DO NOT HALLUCINATE INFORMATION. Only if you are sure that you have answered the user's query then do not call any tools. 
         - Call tool with the right argument types. Use float or int for any numerical inputs
         - Give detailed answer about the query asked by the user, try to answer and solve the query as much as possible using the data available through different tools
-<<<<<<< HEAD
         - If the query requires you to decide based on some information or if it involves Geo-Technical Terms that you need to calculate then use the TOOL:KnowledgeBase to get the information about it and use that information to take the decision as a whole.
-=======
->>>>>>> 5041be2b715c44ea935a14b87c47e5021a5b9b92
         - TOOL:SQLGenerator contains information on roads, railways, landuse, places, points""",
         tools=tools,
     )
