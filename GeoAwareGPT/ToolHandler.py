@@ -5,7 +5,7 @@ import re
 
 from .schema import BaseTool, ToolImageOutput
 
-DEBUG = True
+DEBUG = False
 class ToolHandler:
     def __init__(self, tools: List[BaseTool]):
         self.tools: Dict[str, BaseTool] = {tool.name: tool for tool in tools}

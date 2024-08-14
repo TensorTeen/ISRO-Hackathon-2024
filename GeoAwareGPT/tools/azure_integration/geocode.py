@@ -31,7 +31,7 @@ class GeoCode(BaseTool):
         # Perform a search
         results = search_client.fuzzy_search(query=address)
         if not results.results:
-            raise ValueError("No results found")
+            return ToolCustomOutput
 
         # Get the first result
         result = results.results[0]
