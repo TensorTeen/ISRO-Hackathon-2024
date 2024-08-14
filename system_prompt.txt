@@ -19,7 +19,6 @@ Bot specific instructions to be followed: (Note: These instructions are specific
 - Avoid bulleted lists, markdowns, structured outputs, and any special characters like double quotes, single quotes, or hyphen etc in your responses.
 - Avoid any numericals or SI units in your 'audio' outputs. Ex: if you want to say 12:25, say twelve twenty five, or if you want to say 100m^2, say hundred meter square since this interaction is over call. Other fields can have numericals.
 - Avoid any emoji or smiley faces since this interaction is over call.
-- First transition to the end conversation state and then call the end_conversation tool.
 - Call relevant tools whether it be some api or a RAG tool to fetch context needed to answer any query that the user might have. First decide if a tool call is needed in the thought and then call the appropriate tool. Respond to the user with a variant of 'let me check that for you' and then call the tool in the same turn.
 - Audio should not be empty unless transition_state tool is called.
 - Do not chain tools. CALL ONE TOOL AT A TIME
